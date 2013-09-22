@@ -3,7 +3,7 @@
 Plugin Name: WP Job Manager
 Plugin URI: http://mikejolley.com/projects/wp-job-manager/
 Description: Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
-Version: 1.1.3
+Version: 1.2.0
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.5
@@ -28,7 +28,7 @@ class WP_Job_Manager {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'JOB_MANAGER_VERSION', '1.1.3' );
+		define( 'JOB_MANAGER_VERSION', '1.2.0' );
 		define( 'JOB_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
@@ -50,7 +50,7 @@ class WP_Job_Manager {
 
 		// Activation - works with symlinks
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), array( $this->post_types, 'register_post_types' ), 10 );
-		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), create_function( "", "include( 'includes/class-wp-job-manager-install.php' );" ), 10 );
+		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), create_function( "", "include_once( 'includes/class-wp-job-manager-install.php' );" ), 10 );
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'flush_rewrite_rules', 15 );
 
 		// Actions
@@ -59,6 +59,15 @@ class WP_Job_Manager {
 		add_action( 'switch_theme', 'flush_rewrite_rules', 15 );
 		add_action( 'widgets_init', create_function( "", "include_once( 'includes/class-wp-job-manager-widgets.php' );" ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
+		add_action( 'admin_init', array( $this, 'updater' ) );
+	}
+
+	/**
+	 * Handle Updates
+	 */
+	public function updater() {
+		if ( version_compare( JOB_MANAGER_VERSION, get_option( 'wp_job_manager_version' ), '>' ) )
+			include_once( 'includes/class-wp-job-manager-install.php' );
 	}
 
 	/**

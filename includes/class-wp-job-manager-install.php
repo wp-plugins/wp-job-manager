@@ -16,7 +16,10 @@ class WP_Job_Manager_Install {
 	public function __construct() {
 		$this->init_user_roles();
 		$this->default_terms();
+		$this->default_meta();
 		$this->cron();
+		delete_transient( 'wp_job_manager_addons_html' );
+		update_option( 'wp_job_manager_version', JOB_MANAGER_VERSION );
 	}
 
 	/**
@@ -65,6 +68,21 @@ class WP_Job_Manager_Install {
 		}
 
 		update_option( 'job_manager_installed_terms', 1 );
+	}
+
+	/**
+	 * Add default meta values for all posts
+	 */
+	public function default_meta() {
+		$jobs = get_posts( array(
+			'post_type'      => 'job_listing',
+			'posts_per_page' => -1,
+			'fields'         => 'ids'
+		) );
+
+		foreach ( $jobs as $job ) {
+			add_post_meta( $job, '_featured', 0, true );
+		}
 	}
 
 	/**
