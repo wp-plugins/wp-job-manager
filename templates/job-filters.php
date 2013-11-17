@@ -21,24 +21,23 @@
 		<?php elseif ( $show_categories && get_option( 'job_manager_enable_categories' ) && ! is_tax( 'job_listing_category' ) ) : ?>
 			<div class="search_categories">
 				<label for="search_categories"><?php _e( 'Category', 'job_manager' ); ?></label>
-				<select name="search_categories" id="search_categories">
-					<option value=""><?php _e( 'All Job Categories', 'job_manager' ); ?></option>
-					<?php foreach ( get_job_listing_categories() as $category ) : ?>
-						<option value="<?php echo $category->slug; ?>"><?php echo $category->name; ?></option>
-					<?php endforeach; ?>
-				</select>
+				<?php wp_dropdown_categories( array( 'taxonomy' => 'job_listing_category', 'hierarchical' => 1, 'show_option_all' => __( 'All Job Categories', 'job_manager' ), 'name' => 'search_categories' ) ); ?>
 			</div>
 		<?php endif; ?>
 
 		<?php do_action( 'job_manager_job_filters_search_jobs_end', $atts ); ?>
 	</div>
 
-	<?php if ( ! is_tax( 'job_listing_type' ) ) : ?>
+	<?php if ( ! is_tax( 'job_listing_type' ) && empty( $job_types ) ) : ?>
 		<ul class="job_types">
 			<?php foreach ( get_job_listing_types() as $type ) : ?>
 				<li><label for="job_type_<?php echo $type->slug; ?>" class="<?php echo sanitize_title( $type->name ); ?>"><input type="checkbox" name="filter_job_type[]" value="<?php echo $type->slug; ?>" <?php checked( 1, 1 ); ?> id="job_type_<?php echo $type->slug; ?>" /> <?php echo $type->name; ?></label></li>
 			<?php endforeach; ?>
 		</ul>
+	<?php elseif ( $job_types ) : ?>
+		<?php foreach ( $job_types as $job_type ) : ?>
+			<input type="hidden" name="job_types[]" value="<?php echo sanitize_title( $job_type ); ?>" />
+		<?php endforeach; ?>
 	<?php endif; ?>
 
 	<div class="showing_jobs"></div>

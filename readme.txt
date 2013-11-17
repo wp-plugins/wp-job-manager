@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company
 Requires at least: 3.5
 Tested up to: 3.7
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -71,6 +71,18 @@ The manual installation method involves downloading the plugin and uploading it 
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.5.0 =
+* Ability to edit job expiration date manually via admin
+* Settings API: Password field
+* Frontend Forms: Password field
+* Correctly turn off expiration when 'days' is not set
+* Greek should be el_GR
+* Settings: Use key for tabs - fixes issues with locales
+* Show pending count in admin menu
+* Added job_types argument to jobs shortcode to show jobs of a certain type only
+* Hierarchical dropdown for categories on filter form
+* job_manager_job_submitted hook in submission form
 
 = 1.4.0 =
 * Added pagination to the job dashboard to avoid memory issues
