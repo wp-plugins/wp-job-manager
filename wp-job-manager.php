@@ -3,7 +3,7 @@
 Plugin Name: WP Job Manager
 Plugin URI: http://mikejolley.com/projects/wp-job-manager/
 Description: Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
-Version: 1.5.0
+Version: 1.5.1
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.5
@@ -28,7 +28,7 @@ class WP_Job_Manager {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'JOB_MANAGER_VERSION', '1.5.0' );
+		define( 'JOB_MANAGER_VERSION', '1.5.1' );
 		define( 'JOB_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
@@ -90,6 +90,7 @@ class WP_Job_Manager {
 		wp_register_script( 'wp-job-manager-ajax-filters', JOB_MANAGER_PLUGIN_URL . '/assets/js/ajax-filters.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
 		wp_register_script( 'wp-job-manager-job-dashboard', JOB_MANAGER_PLUGIN_URL . '/assets/js/job-dashboard.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
 		wp_register_script( 'wp-job-manager-job-application', JOB_MANAGER_PLUGIN_URL . '/assets/js/job-application.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
+		wp_register_script( 'wp-job-manager-job-submission', JOB_MANAGER_PLUGIN_URL . '/assets/js/job-submission.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
 
 		wp_localize_script( 'wp-job-manager-ajax-filters', 'job_manager_ajax_filters', array(
 			'ajax_url' => admin_url('admin-ajax.php')

@@ -69,58 +69,28 @@ function locate_job_manager_template( $template_name, $template_path = '', $defa
  * @param string $name (default: '')
  * @return void
  */
-function get_job_manager_template_part( $slug, $name = '' ) {
+function get_job_manager_template_part( $slug, $name = '', $template_path = '', $default_path = '' ) {
+	if ( ! $template_path )
+		$template_path = 'job_manager';
+	if ( ! $default_path )
+		$default_path = JOB_MANAGER_PLUGIN_DIR . '/templates/';
+
 	$template = '';
 
 	// Look in yourtheme/slug-name.php and yourtheme/job_manager/slug-name.php
 	if ( $name )
-		$template = locate_template( array ( "{$slug}-{$name}.php", "job_manager/{$slug}-{$name}.php" ) );
+		$template = locate_template( array ( "{$slug}-{$name}.php", "{$template_path}/{$slug}-{$name}.php" ) );
 
 	// Get default slug-name.php
-	if ( ! $template && $name && file_exists( JOB_MANAGER_PLUGIN_DIR . "/templates/{$slug}-{$name}.php" ) )
-		$template = JOB_MANAGER_PLUGIN_DIR . "/templates/{$slug}-{$name}.php";
+	if ( ! $template && $name && file_exists( $default_path . "{$slug}-{$name}.php" ) )
+		$template = $default_path . "{$slug}-{$name}.php";
 
 	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/job_manager/slug.php
 	if ( ! $template )
-		$template = locate_template( array ( "{$slug}.php", "job_manager/{$slug}.php" ) );
+		$template = locate_template( array( "{$slug}.php", "{$template_path}/{$slug}.php" ) );
 
 	if ( $template )
 		load_template( $template, false );
-}
-
-/**
- * True if an the user can post a job. If accounts are required, and reg is enabled, users can post (they signup at the same time).
- *
- * @return bool
- */
-function job_manager_user_can_post_job() {
-	$can_post = true;
-
-	if ( ! is_user_logged_in() ) {
-		if ( job_manager_user_requires_account() && ! job_manager_enable_registration() ) {
-			$can_post = false;
-		}
-	}
-
-	return apply_filters( 'job_manager_user_can_post_job', $can_post );
-}
-
-/**
- * True if registration is enabled.
- *
- * @return bool
- */
-function job_manager_enable_registration() {
-	return apply_filters( 'job_manager_enable_registration', get_option( 'job_manager_enable_registration' ) == 1 ? true : false );
-}
-
-/**
- * True if an account is required to post a job.
- *
- * @return bool
- */
-function job_manager_user_requires_account() {
-	return apply_filters( 'job_manager_user_requires_account', get_option( 'job_manager_user_requires_account' ) == 1 ? true : false );
 }
 
 /**
@@ -278,7 +248,7 @@ function the_job_location( $map_link = true, $post = null ) {
 
 	if ( $location ) {
 		if ( $map_link )
-			echo '<a class="google_map_link" href="http://maps.google.com/maps?q=' . urlencode( $location ) . '&zoom=14&size=512x512&maptype=roadmap&sensor=false">' . $location . '</a>';
+			echo apply_filters( 'the_job_location_map_link', '<a class="google_map_link" href="http://maps.google.com/maps?q=' . urlencode( $location ) . '&zoom=14&size=512x512&maptype=roadmap&sensor=false">' . $location . '</a>', $location, $post );
 		else
 			echo $location;
 	} else {
