@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 3.8
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -43,7 +43,7 @@ Some notable add-ons include:
 
 = Contributing and reporting bugs =
 
-You can contribute code and localizations to this plugin via GitHub: [https://github.com/mikejolley/wp-job-manager](https://github.com/mikejolley/wp-job-manager)
+You can contribute code to this plugin via GitHub: [https://github.com/mikejolley/wp-job-manager](https://github.com/mikejolley/wp-job-manager) and localizations via Transifex: [https://www.transifex.com/projects/p/wp-job-manager/](https://www.transifex.com/projects/p/wp-job-manager/)
 
 = Support =
 
@@ -89,6 +89,12 @@ For more information, [read the documentation](https://github.com/mikejolley/wp-
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.7.1 =
+* Updated textdomain to wp-job-manager
+* Re-done .pot file 
+* Additonal filters for ajax responses
+* Moved localisations to Transifex https://www.transifex.com/projects/p/wp-job-manager/
 
 = 1.7.0 = 
 * Added geolocation to save location data to meta after posting or saving a job. This will be used by other plugins.

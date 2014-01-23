@@ -113,13 +113,13 @@ function get_the_job_status( $post = null ) {
 	$status = $post->post_status;
 
 	if ( $status == 'publish' )
-		$status = __( 'Active', 'job_manager' );
+		$status = __( 'Active', 'wp-job-manager' );
 	elseif ( $status == 'expired' )
-		$status = __( 'Expired', 'job_manager' );
+		$status = __( 'Expired', 'wp-job-manager' );
 	elseif ( $status == 'pending' )
-		$status = __( 'Pending Review', 'job_manager' );
+		$status = __( 'Pending Review', 'wp-job-manager' );
 	else
-		$status = __( 'Inactive', 'job_manager' );
+		$status = __( 'Inactive', 'wp-job-manager' );
 
 	return apply_filters( 'the_job_status', $status, $post );
 }
@@ -252,7 +252,7 @@ function the_job_location( $map_link = true, $post = null ) {
 		else
 			echo $location;
 	} else {
-		echo apply_filters( 'the_job_location_anywhere_text', __( 'Anywhere', 'job_manager' ) );
+		echo apply_filters( 'the_job_location_anywhere_text', __( 'Anywhere', 'wp-job-manager' ) );
 	}
 }
 
@@ -289,12 +289,12 @@ function the_company_logo( $size = 'full', $default = null, $post = null ) {
 		if ( $size !== 'full' )
 			$logo = job_manager_get_resized_image( $logo, $size );
 
-		echo '<img src="' . $logo . '" alt="Logo" />';
+		echo '<img class="company_logo" src="' . $logo . '" alt="Logo" />';
 
 	} elseif ( $default )
-		echo '<img src="' . $default . '" alt="Logo" />';
+		echo '<img class="company_logo" src="' . $default . '" alt="Logo" />';
 	else
-		echo '<img src="' . JOB_MANAGER_PLUGIN_URL . '/assets/images/company.png' . '" alt="Logo" />';
+		echo '<img class="company_logo" src="' . JOB_MANAGER_PLUGIN_URL . '/assets/images/company.png' . '" alt="Logo" />';
 }
 
 /**
