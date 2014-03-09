@@ -58,31 +58,49 @@ function get_job_listings( $args = array() ) {
 
 	// Location search - search geolocation data and location meta
 	if ( $args['search_location'] ) {
-		$post_ids = $wpdb->get_col( $wpdb->prepare( "
+		$location_post_ids = array_merge( $wpdb->get_col( $wpdb->prepare( "
 		    SELECT DISTINCT post_id FROM {$wpdb->postmeta}
 		    WHERE meta_key IN ( 'geolocation_city', 'geolocation_country_long', 'geolocation_country_short', 'geolocation_formatted_address', 'geolocation_state_long', 'geolocation_state_short', 'geolocation_street', 'geolocation_zipcode', '_job_location' ) 
 		    AND meta_value LIKE '%%%s%%'
-		", $args['search_location'] ) );
-
-		$query_args['post__in'] = $post_ids + array( 0 );
+		", $args['search_location'] ) ), array( 0 ) );
+	} else {
+		$location_post_ids = array();
 	}
 
 	// Keyword search - search meta as well as post content
 	if ( $args['search_keywords'] ) {
-		$post_ids = $wpdb->get_col( $wpdb->prepare( "
-		    SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-		    WHERE meta_value LIKE '%%%s%%'
-		", $args['search_keywords'] ) );
+		$search_keywords              = array_map( 'trim', explode( ',', $args['search_keywords'] ) );
+		$posts_search_keywords_sql    = array();
+		$postmeta_search_keywords_sql = array();
 
-		$post_ids = array_merge( $post_ids, $wpdb->get_col( $wpdb->prepare( "
+		foreach ( $search_keywords as $keyword ) {
+			$postmeta_search_keywords_sql[] = " meta_value LIKE '%" . $wpdb->escape( $keyword ) . "%' ";
+			$posts_search_keywords_sql[]    = " 
+				post_title LIKE '%" . $wpdb->escape( $keyword ) . "%' 
+				OR post_content LIKE '%" . $wpdb->escape( $keyword ) . "%' 
+			";
+		}
+
+		$keyword_post_ids = $wpdb->get_col( "
+		    SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+		    WHERE " . implode( ' OR ', $postmeta_search_keywords_sql ) . "
+		" );
+
+		$keyword_post_ids = array_merge( $keyword_post_ids, $wpdb->get_col( "
 		    SELECT ID FROM {$wpdb->posts}
-		    WHERE post_title LIKE '%%%s%%'
-		    OR post_content LIKE '%%%s%%'
+		    WHERE ( " . implode( ' OR ', $posts_search_keywords_sql ) . " )
 		    AND post_type = 'job_listing'
 		    AND post_status = 'publish'
-		", $args['search_keywords'], $args['search_keywords'] ) ) );
+		" ), array( 0 ) );
+	} else {
+		$keyword_post_ids = array();
+	}
 
-		$query_args['post__in'] = $post_ids + array( 0 );
+	// Merge post ids
+	if ( ! empty( $location_post_ids ) && ! empty( $keyword_post_ids ) ) {
+		$query_args['post__in'] = array_intersect( $location_post_ids, $keyword_post_ids );
+	} elseif ( ! empty( $location_post_ids ) || ! empty( $keyword_post_ids ) ) {
+		$query_args['post__in'] = array_merge( $location_post_ids, $keyword_post_ids );
 	}
 
 	$query_args = apply_filters( 'job_manager_get_listings', $query_args );

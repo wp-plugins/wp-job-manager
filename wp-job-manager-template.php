@@ -194,7 +194,7 @@ function get_the_job_application_method( $post = null ) {
 		$method->type      = 'email';
 		$method->raw_email = $apply;
 		$method->email     = antispambot( $apply );
-		$method->subject   = 'Job Application via "' . $post->post_title . '" listing on ' . home_url();
+		$method->subject   = apply_filters( 'job_manager_application_email_subject', sprintf( __( 'Job Application via "%s" listing on %s', 'wp-job-manager' ), $post->post_title, home_url() ) );
 	} else {
 		if ( strpos( $apply, 'http' ) !== 0 )
 			$apply = 'http://' . $apply;
@@ -396,10 +396,17 @@ function get_the_company_name( $post = null ) {
  */
 function get_the_company_website( $post = null ) {
 	$post = get_post( $post );
+
 	if ( $post->post_type !== 'job_listing' )
 		return;
 
-	return apply_filters( 'the_company_website', $post->_company_website, $post );
+	$website = $post->_company_website;
+
+	if ( $website && ! strstr( $website, 'http:' ) && ! strstr( $website, 'https:' ) ) {
+		$website = 'http://' . $website;
+	}
+
+	return apply_filters( 'the_company_website', $website, $post );
 }
 
 /**
