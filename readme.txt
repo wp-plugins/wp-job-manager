@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 3.8
-Stable tag: 1.8.2
+Stable tag: 1.9.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -89,6 +89,20 @@ For more information, [read the documentation](https://github.com/mikejolley/wp-
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.9.0 =
+* Template - Split off URL and email application methods and added new hooks. This allows other plugins to manipulate the content.
+* Pass $values to edit job save function so permalinks are preserved.
+* When showing filters, ensure we check by slug if category is non-numeric.
+* Give listings ul a min height so that loading image is visible.
+* content-no-jobs-found.php template.
+* Fix apostrophe direction in signin template.
+* Bulk expire jobs.
+* submit_job_form_required_label hook.
+* ability to set default state for selects on submit form.
+* allow passed in classes in get_job_listing_class function.
+* Hook in the content only if in_the_loop(). Fixes issues with jobify and yoast SEO.
+* Removed .clear mixin to prevent theme conflicts.
 
 = 1.8.2 =
 * For initial load, target all .job_filters areas. Jobify compat.

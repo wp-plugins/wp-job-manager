@@ -8,14 +8,14 @@ jQuery( document ).ready( function ( $ ) {
 			xhr.abort();
 		}
 
-		var data = '';
-		var target = $( this );
-		var form = target.find( '.job_filters' );
-		var showing = target.find( '.showing_jobs' );
-		var results = target.find( '.job_listings' );
+		var data     = '';
+		var target   = $( this );
+		var form     = target.find( '.job_filters' );
+		var showing  = target.find( '.showing_jobs' );
+		var results  = target.find( '.job_listings' );
 		var per_page = target.data( 'per_page' );
-		var orderby = target.data( 'orderby' );
-		var order = target.data( 'order' );
+		var orderby  = target.data( 'orderby' );
+		var order    = target.data( 'order' );
 
 		if ( append ) {
 			$( '.load_more_jobs', target ).addClass( 'loading' );
@@ -64,11 +64,19 @@ jQuery( document ).ready( function ( $ ) {
 
 		} else {
 
+			var categories = target.data( 'categories' );
+			var keywords   = target.data( 'keywords' );
+			var location   = target.data( 'location' );
+
+			if ( categories ) {
+				categories = categories.split( ',' );
+			}
+
 			data = {
 				action: 'job_manager_get_listings',
-				search_categories: target.data( 'categories' ).split( ',' ),
-				search_keywords: target.data( 'keywords' ),
-				search_location: target.data( 'location' ),
+				search_categories: categories,
+				search_keywords: keywords,
+				search_location: location,
 				per_page: per_page,
 				orderby: orderby,
 				order: order,
