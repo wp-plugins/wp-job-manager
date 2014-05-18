@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WP Job Manager package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Job Manager 1.10.0\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-job-manager\n"
-"POT-Creation-Date: 2014-05-04 15:25:11+00:00\n"
+"Project-Id-Version: WP Job Manager 1.11.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/WP-Job-Manager\n"
+"POT-Creation-Date: 2014-05-18 11:40:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,12 +12,12 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: includes/admin/class-wp-job-manager-addons.php:50
+#: includes/admin/class-wp-job-manager-addons.php:57
 #: includes/admin/class-wp-job-manager-admin.php:60
 msgid "WP Job Manager Add-ons"
 msgstr ""
 
-#: includes/admin/class-wp-job-manager-addons.php:51
+#: includes/admin/class-wp-job-manager-addons.php:58
 msgid ""
 "Buying multiple add-ons? <a href=\"%s\">Check out the core add-on bundle "
 "&rarr;</a>"
@@ -119,7 +119,6 @@ msgid "Posted"
 msgstr ""
 
 #: includes/admin/class-wp-job-manager-cpt.php:281
-#: templates/job-dashboard.php:9
 msgid "Expires"
 msgstr ""
 
@@ -132,12 +131,11 @@ msgid "Featured?"
 msgstr ""
 
 #: includes/admin/class-wp-job-manager-cpt.php:285
-#: templates/job-dashboard.php:10
+#: includes/class-wp-job-manager-shortcodes.php:157
 msgid "Filled?"
 msgstr ""
 
 #: includes/admin/class-wp-job-manager-cpt.php:286
-#: templates/job-dashboard.php:8
 msgid "Status"
 msgstr ""
 
@@ -419,24 +417,30 @@ msgstr ""
 msgid "Guest user"
 msgstr ""
 
-#: includes/class-wp-job-manager-ajax.php:111
+#: includes/class-wp-job-manager-ajax.php:114
 msgid "Showing %s&ldquo;%s&rdquo; %sjobs"
 msgstr ""
 
-#: includes/class-wp-job-manager-ajax.php:113
+#: includes/class-wp-job-manager-ajax.php:116
 msgid "Showing all %s%sjobs"
 msgstr ""
 
-#: includes/class-wp-job-manager-ajax.php:116
+#: includes/class-wp-job-manager-ajax.php:119
 msgid "located in &ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/class-wp-job-manager-geocode.php:130
+#: includes/class-wp-job-manager-geocode.php:139
 msgid "No results found"
 msgstr ""
 
-#: includes/class-wp-job-manager-geocode.php:133
+#: includes/class-wp-job-manager-geocode.php:143
 msgid "Query limit reached"
+msgstr ""
+
+#: includes/class-wp-job-manager-geocode.php:149
+#: includes/class-wp-job-manager-geocode.php:153
+#: includes/class-wp-job-manager-geocode.php:157
+msgid "Geocoding error"
 msgstr ""
 
 #: includes/class-wp-job-manager-install.php:39
@@ -567,36 +571,48 @@ msgid_plural "Expired <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-wp-job-manager-shortcodes.php:61
+#: includes/class-wp-job-manager-shortcodes.php:62
 msgid "Invalid Job ID"
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:67
+#: includes/class-wp-job-manager-shortcodes.php:69
 msgid "This job is already filled"
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:73
+#: includes/class-wp-job-manager-shortcodes.php:75
 msgid "%s has been filled"
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:78
+#: includes/class-wp-job-manager-shortcodes.php:80
 msgid "This job is already not filled"
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:84
+#: includes/class-wp-job-manager-shortcodes.php:86
 msgid "%s has been marked as not filled"
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:91
+#: includes/class-wp-job-manager-shortcodes.php:93
 msgid "%s has been deleted"
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:111
+#: includes/class-wp-job-manager-shortcodes.php:116
 msgid "You need to be signed in to manage your job listings."
 msgstr ""
 
-#: includes/class-wp-job-manager-shortcodes.php:204
-#: includes/class-wp-job-manager-shortcodes.php:235
+#: includes/class-wp-job-manager-shortcodes.php:156
+msgid "Job Title"
+msgstr ""
+
+#: includes/class-wp-job-manager-shortcodes.php:158
+msgid "Date Posted"
+msgstr ""
+
+#: includes/class-wp-job-manager-shortcodes.php:159
+msgid "Date Expires"
+msgstr ""
+
+#: includes/class-wp-job-manager-shortcodes.php:245
+#: includes/class-wp-job-manager-shortcodes.php:276
 msgid "Load more job listings"
 msgstr ""
 
@@ -628,11 +644,11 @@ msgstr ""
 msgid "Update job listing"
 msgstr ""
 
-#: includes/forms/class-wp-job-manager-form-edit-job.php:112
+#: includes/forms/class-wp-job-manager-form-edit-job.php:113
 msgid "Your changes have been saved."
 msgstr ""
 
-#: includes/forms/class-wp-job-manager-form-edit-job.php:112
+#: includes/forms/class-wp-job-manager-form-edit-job.php:113
 msgid "View Job Listing &rarr;"
 msgstr ""
 
@@ -641,7 +657,7 @@ msgid "Submit Details"
 msgstr ""
 
 #: includes/forms/class-wp-job-manager-form-submit-job.php:28
-#: includes/forms/class-wp-job-manager-form-submit-job.php:606
+#: includes/forms/class-wp-job-manager-form-submit-job.php:607
 msgid "Preview"
 msgstr ""
 
@@ -691,7 +707,7 @@ msgid "Enter the name of the company"
 msgstr ""
 
 #: includes/forms/class-wp-job-manager-form-submit-job.php:179
-#: templates/content-single-job_listing.php:32
+#: templates/content-single-job_listing.php:36
 msgid "Website"
 msgstr ""
 
@@ -735,19 +751,19 @@ msgstr ""
 msgid "Preview job listing &rarr;"
 msgstr ""
 
-#: includes/forms/class-wp-job-manager-form-submit-job.php:492
+#: includes/forms/class-wp-job-manager-form-submit-job.php:493
 msgid "You must be signed in to post a new job listing."
 msgstr ""
 
-#: includes/forms/class-wp-job-manager-form-submit-job.php:600
+#: includes/forms/class-wp-job-manager-form-submit-job.php:601
 msgid "Submit Listing &rarr;"
 msgstr ""
 
-#: includes/forms/class-wp-job-manager-form-submit-job.php:601
+#: includes/forms/class-wp-job-manager-form-submit-job.php:602
 msgid "&larr; Edit listing"
 msgstr ""
 
-#: includes/forms/class-wp-job-manager-form-submit-job.php:684
+#: includes/forms/class-wp-job-manager-form-submit-job.php:685
 msgid "\"%s\" needs to be one of the following file types: %s"
 msgstr ""
 
@@ -795,7 +811,7 @@ msgid "(optional)"
 msgstr ""
 
 #: templates/content-job_listing.php:16
-#: templates/content-single-job_listing.php:19
+#: templates/content-single-job_listing.php:21
 #: templates/content-summary-job_listing.php:14
 msgid "Posted %s ago"
 msgstr ""
@@ -808,7 +824,7 @@ msgstr ""
 msgid "This job listing has expired"
 msgstr ""
 
-#: templates/content-single-job_listing.php:22
+#: templates/content-single-job_listing.php:24
 msgid "This position has been filled"
 msgstr ""
 
@@ -850,15 +866,7 @@ msgid ""
 "automatically removed after 30 days."
 msgstr ""
 
-#: templates/job-dashboard.php:6
-msgid "Job Title"
-msgstr ""
-
-#: templates/job-dashboard.php:7
-msgid "Date Posted"
-msgstr ""
-
-#: templates/job-dashboard.php:16
+#: templates/job-dashboard.php:14
 msgid "You do not have any active job listings."
 msgstr ""
 
@@ -909,19 +917,19 @@ msgid ""
 "Job submitted successfully. Your job listing will be visible once approved."
 msgstr ""
 
-#: wp-job-manager-functions.php:224
+#: wp-job-manager-functions.php:226
 msgid "Reset"
 msgstr ""
 
-#: wp-job-manager-functions.php:228
+#: wp-job-manager-functions.php:230
 msgid "RSS"
 msgstr ""
 
-#: wp-job-manager-functions.php:278
+#: wp-job-manager-functions.php:280
 msgid "Your email address isn&#8217;t correct."
 msgstr ""
 
-#: wp-job-manager-functions.php:281
+#: wp-job-manager-functions.php:283
 msgid "This email is already registered, please choose another one."
 msgstr ""
 

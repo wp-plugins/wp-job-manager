@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 1.10.0
+Stable tag: 1.11.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -91,16 +91,27 @@ For more information, [read the documentation](https://wpjobmanager.com/document
 
 == Changelog ==
 
+= 1.11.0
+* Switch geocode to json and improve error checking.
+* If query limit is reached, stop making requests for a while.
+* Added extra data inside job_feed.
+* Few extra icons in font.
+* Additonal hooks in single template.
+* Pick up search_category from querystring to set default/selected category.
+* Ability to define selected_job_types for the jobs shortcode which will set the default job type filters.
+* Took out show_featured_only arg for the [jobs] shortcode and added 'featured' which can be set to true or false to show or hide featured jobs, or left null to show both.
+* Removed nonce from frontend job submission form to prevent issues with caching.
+
 = 1.10.0 = 
-* Trigger change on 'enter' when filtering jobs
-* Updated add-ons page to pull from wpjobmanager.com
-* Updated links 
-* Fixed support for custom upload URLs
-* Choose/limit application method to email, url or either
-* Default application value (if logged in) set to user's email address
-* show_featured_only option for [jobs] shortcode
-* Add required-field class around required inputs
-* Enable paste as text in wp-editor field
+* Trigger change on 'enter' when filtering jobs.
+* Updated add-ons page to pull from wpjobmanager.com.
+* Updated links.
+* Fixed support for custom upload URLs.
+* Choose/limit application method to email, url or either.
+* Default application value (if logged in) set to user's email address.
+* show_featured_only option for [jobs] shortcode.
+* Add required-field class around required inputs.
+* Enable paste as text in wp-editor field.
 
 = 1.9.3 = 
 * Fix email URLs.
