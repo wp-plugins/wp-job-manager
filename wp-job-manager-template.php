@@ -108,18 +108,15 @@ function the_job_status( $post = null ) {
  * @return string
  */
 function get_the_job_status( $post = null ) {
-	$post = get_post( $post );
+	$post     = get_post( $post );
+	$status   = $post->post_status;
+	$statuses = get_job_listing_post_statuses();
 
-	$status = $post->post_status;
-
-	if ( $status == 'publish' )
-		$status = __( 'Active', 'wp-job-manager' );
-	elseif ( $status == 'expired' )
-		$status = __( 'Expired', 'wp-job-manager' );
-	elseif ( $status == 'pending' )
-		$status = __( 'Pending Review', 'wp-job-manager' );
-	else
+	if ( isset( $statuses[ $status ] ) ) {
+		$status = $statuses[ $status ];
+	} else {
 		$status = __( 'Inactive', 'wp-job-manager' );
+	}
 
 	return apply_filters( 'the_job_status', $status, $post );
 }
@@ -194,7 +191,7 @@ function get_the_job_application_method( $post = null ) {
 		$method->type      = 'email';
 		$method->raw_email = $apply;
 		$method->email     = antispambot( $apply );
-		$method->subject   = apply_filters( 'job_manager_application_email_subject', sprintf( __( 'Job Application via "%s" listing on %s', 'wp-job-manager' ), $post->post_title, home_url() ) );
+		$method->subject   = apply_filters( 'job_manager_application_email_subject', sprintf( __( 'Job Application via "%s" listing on %s', 'wp-job-manager' ), $post->post_title, home_url() ), $post );
 	} else {
 		if ( strpos( $apply, 'http' ) !== 0 )
 			$apply = 'http://' . $apply;
@@ -280,8 +277,6 @@ function get_the_job_location( $post = null ) {
  * @return void
  */
 function the_company_logo( $size = 'full', $default = null, $post = null ) {
-	global $job_manager;
-
 	$logo = get_the_company_logo( $post );
 
 	if ( ! empty( $logo ) && ( strstr( $logo, 'http' ) || file_exists( $logo ) ) ) {
@@ -462,7 +457,7 @@ function the_company_twitter( $before = '', $after = '', $echo = true, $post = n
 		return;
 
 	$company_twitter = esc_attr( strip_tags( $company_twitter ) );
-	$company_twitter = $before . '<a href="http://twitter.com/' . $company_twitter . '" class="company_twitter">' . $company_twitter . '</a>' . $after;
+	$company_twitter = $before . '<a href="http://twitter.com/' . $company_twitter . '" class="company_twitter" target="_blank">' . $company_twitter . '</a>' . $after;
 
 	if ( $echo )
 		echo $company_twitter;

@@ -114,7 +114,7 @@ function get_job_listings( $args = array() ) {
 		$query_args['post__in'] = array_merge( $location_post_ids, $keyword_post_ids );
 	}
 
-	$query_args = apply_filters( 'job_manager_get_listings', $query_args );
+	$query_args = apply_filters( 'job_manager_get_listings', $query_args, $args );
 
 	if ( empty( $query_args['meta_query'] ) )
 		unset( $query_args['meta_query'] );
@@ -129,17 +129,36 @@ function get_job_listings( $args = array() ) {
 	}
 
 	// Filter args
-	$query_args = apply_filters( 'get_job_listings_query_args', $query_args );
+	$query_args = apply_filters( 'get_job_listings_query_args', $query_args, $args );
 
-	do_action( 'before_get_job_listings', $query_args );
+	do_action( 'before_get_job_listings', $query_args, $args );
 
 	$result = new WP_Query( $query_args );
 
-	do_action( 'after_get_job_listings', $query_args );
+	do_action( 'after_get_job_listings', $query_args, $args );
 
 	remove_filter( 'posts_clauses', 'order_featured_job_listing' );
 
 	return $result;
+}
+endif;
+
+if ( ! function_exists( 'get_job_listing_post_statuses' ) ) :
+/**
+ * Get post statuses used for jobs
+ *
+ * @access public
+ * @return array
+ */
+function get_job_listing_post_statuses() {
+	return apply_filters( 'job_listing_post_statuses', array(
+		'draft'           => _x( 'Draft', 'post status', 'wp-job-manager' ),
+		'expired'         => _x( 'Expired', 'post status', 'wp-job-manager' ),
+		'preview'         => _x( 'Preview', 'post status', 'wp-job-manager' ),
+		'pending'         => _x( 'Pending approval', 'post status', 'wp-job-manager' ),
+		'pending_payment' => _x( 'Pending payment', 'post status', 'wp-job-manager' ),
+		'publish'         => _x( 'Active', 'post status', 'wp-job-manager' ),
+	) );
 }
 endif;
 
@@ -181,7 +200,7 @@ endif;
 
 if ( ! function_exists( 'get_job_listing_types' ) ) :
 /**
- * Outputs a form to submit a new job to the site from the frontend.
+ * Get job listing types
  *
  * @access public
  * @return array
@@ -198,14 +217,15 @@ endif;
 
 if ( ! function_exists( 'get_job_listing_categories' ) ) :
 /**
- * Outputs a form to submit a new job to the site from the frontend.
+ * Get job categories
  *
  * @access public
  * @return array
  */
 function get_job_listing_categories() {
-	if ( ! get_option( 'job_manager_enable_categories' ) )
+	if ( ! get_option( 'job_manager_enable_categories' ) ) {
 		return array();
+	}
 
 	return get_terms( "job_listing_category", array(
 		'orderby'       => 'name',
@@ -297,11 +317,12 @@ function wp_job_manager_create_account( $account_email, $role = '' ) {
 
 	// Final error check
 	$reg_errors = new WP_Error();
-	do_action( 'register_post', $username, $user_email, $reg_errors );
-	$reg_errors = apply_filters( 'registration_errors', $reg_errors, $username, $user_email );
+	do_action( 'job_manager_register_post', $username, $user_email, $reg_errors );
+	$reg_errors = apply_filters( 'job_manager_registration_errors', $reg_errors, $username, $user_email );
 
-	if ( $reg_errors->get_error_code() )
+	if ( $reg_errors->get_error_code() ) {
 		return $reg_errors;
+	}
 
 	// Create account
 	$new_user = array(

@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 1.11.1
+Stable tag: 1.12.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -90,6 +90,19 @@ For more information, [read the documentation](https://wpjobmanager.com/document
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.12.0 =
+* On the job submission form, display hierarchical categories.
+* Use job_manager_ prefixed hooks for registration (register_post/registration_errors/register_form) to prevent issues with Captcha plugins.
+* Pass $post to job_manager_application_email_subject
+* Additonal hooks in job-filters template, and moved out job types output to separate template file.
+* Option to set the job dashboard page slug so plugins know where to look.
+* Allow you@yourdomain.com to be translated.
+* Make taxonomies hidden unless current_theme_supports( 'job-manager-templates' )
+* Adjusted job application area styling and added some additonal filters.
+* Improve backend order status selection.
+* Added some responsive styles for job lists.
+* Allow users to relist a job from the frontend. (Ensure WC Paid Listings and Simple Paid Listings are updated to support this).
 
 = 1.11.1 =
 * Fix ajax filters 'true' for show_filters

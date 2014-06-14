@@ -18,6 +18,8 @@ class WP_Job_Manager_Shortcodes {
 	public function __construct() {
 		add_action( 'wp', array( $this, 'shortcode_action_handler' ) );
 		add_action( 'job_manager_job_dashboard_content_edit', array( $this, 'edit_job' ) );
+		add_action( 'job_manager_job_filters_end', array( $this, 'job_filter_job_types' ), 20 );
+		add_action( 'job_manager_job_filters_end', array( $this, 'job_filter_results' ), 30 );
 
 		add_shortcode( 'submit_job_form', array( $this, 'submit_job_form' ) );
 		add_shortcode( 'job_dashboard', array( $this, 'job_dashboard' ) );
@@ -93,6 +95,11 @@ class WP_Job_Manager_Shortcodes {
 						$this->job_dashboard_message = '<div class="job-manager-message">' . sprintf( __( '%s has been deleted', 'wp-job-manager' ), $job->post_title ) . '</div>';
 
 						break;
+					case 'relist' :
+						// redirect to post page
+						wp_redirect( add_query_arg( array( 'step' => 'preview', 'job_id' => absint( $job_id ) ), get_permalink( get_page_by_path( get_option( 'job_manager_submit_page_slug' ) )->ID ) ) );
+
+						break;
 					default :
 						do_action( 'job_manager_job_dashboard_do_action_' . $action );
 						break;
@@ -110,8 +117,6 @@ class WP_Job_Manager_Shortcodes {
 	 * Shortcode which lists the logged in user's jobs
 	 */
 	public function job_dashboard( $atts ) {
-		global $job_manager;
-
 		if ( ! is_user_logged_in() ) {
 			return __( 'You need to be signed in to manage your job listings.', 'wp-job-manager' );
 		}
@@ -181,8 +186,6 @@ class WP_Job_Manager_Shortcodes {
 	 * @return void
 	 */
 	public function output_jobs( $atts ) {
-		global $job_manager;
-
 		ob_start();
 
 		extract( $atts = shortcode_atts( apply_filters( 'job_manager_output_jobs_defaults', array(
@@ -303,6 +306,26 @@ class WP_Job_Manager_Shortcodes {
 	}
 
 	/**
+	 * Show job types 
+	 * @param  array $atts
+	 */
+	public function job_filter_job_types( $atts ) {
+		extract( $atts );
+
+		$job_types          = array_filter( array_map( 'trim', explode( ',', $job_types ) ) );
+		$selected_job_types = array_filter( array_map( 'trim', explode( ',', $selected_job_types ) ) );
+
+		get_job_manager_template( 'job-filter-job-types.php', array( 'job_types' => $job_types, 'atts' => $atts, 'selected_job_types' => $selected_job_types ) );
+	}
+
+	/**
+	 * Show results div
+	 */
+	public function job_filter_results() {
+		echo '<div class="showing_jobs"></div>';
+	}
+
+	/**
 	 * output_job function.
 	 *
 	 * @access public
@@ -310,8 +333,6 @@ class WP_Job_Manager_Shortcodes {
 	 * @return string
 	 */
 	public function output_job( $atts ) {
-		global $job_manager;
-
 		extract( shortcode_atts( array(
 			'id' => '',
 		), $atts ) );
@@ -354,8 +375,6 @@ class WP_Job_Manager_Shortcodes {
 	 * @return string
 	 */
 	public function output_job_summary( $atts ) {
-		global $job_manager;
-
 		extract( shortcode_atts( array(
 			'id'    => '',
 			'width' => '250px',
