@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: WP Job Manager\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-job-manager\n"
 "POT-Creation-Date: 2014-05-11 11:00:29+00:00\n"
-"PO-Revision-Date: 2014-05-12 08:21+0000\n"
+"PO-Revision-Date: 2014-06-28 12:01+0000\n"
 "Last-Translator: Mike Jolley <mike.jolley@me.com>\n"
 "Language-Team: Croatian (http://www.transifex.com/projects/p/wp-job-manager/language/hr/)\n"
 "MIME-Version: 1.0\n"
@@ -568,7 +568,7 @@ msgstr ""
 #: includes/class-wp-job-manager-post-types.php:207
 msgctxt "job_listing"
 msgid "Expired"
-msgstr ""
+msgstr "Istekao"
 
 #: includes/class-wp-job-manager-post-types.php:212
 msgid "Expired <span class=\"count\">(%s)</span>"

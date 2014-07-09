@@ -94,6 +94,16 @@ function get_job_manager_template_part( $slug, $name = '', $template_path = '', 
 }
 
 /**
+ * Get jobs pagination for [jobs] shortcode
+ * @return [type] [description]
+ */
+function get_job_listing_pagination( $max_num_pages, $current_page = 1 ) {
+	ob_start();
+	get_job_manager_template( 'job-pagination.php', array( 'max_num_pages' => $max_num_pages, 'current_page' => absint( $current_page ) ) );
+	return ob_get_clean();
+}
+
+/**
  * Outputs the jobs status
  *
  * @return void
@@ -284,12 +294,12 @@ function the_company_logo( $size = 'full', $default = null, $post = null ) {
 		if ( $size !== 'full' )
 			$logo = job_manager_get_resized_image( $logo, $size );
 
-		echo '<img class="company_logo" src="' . $logo . '" alt="Logo" />';
+		echo '<img class="company_logo" src="' . $logo . '" alt="' . get_the_company_name( $post ) . '" />';
 
 	} elseif ( $default )
-		echo '<img class="company_logo" src="' . $default . '" alt="Logo" />';
+		echo '<img class="company_logo" src="' . $default . '" alt="' . get_the_company_name( $post ) . '" />';
 	else
-		echo '<img class="company_logo" src="' . JOB_MANAGER_PLUGIN_URL . '/assets/images/company.png' . '" alt="Logo" />';
+		echo '<img class="company_logo" src="' . JOB_MANAGER_PLUGIN_URL . '/assets/images/company.png' . '" alt="' . get_the_company_name( $post ) . '" />';
 }
 
 /**
@@ -373,12 +383,13 @@ function the_company_name( $before = '', $after = '', $echo = true, $post = null
  *
  * @access public
  * @param int $post (default: null)
- * @return void
+ * @return string
  */
 function get_the_company_name( $post = null ) {
 	$post = get_post( $post );
-	if ( $post->post_type !== 'job_listing' )
-		return;
+	if ( $post->post_type !== 'job_listing' ) {
+		return '';
+	}
 
 	return apply_filters( 'the_company_name', $post->_company_name, $post );
 }

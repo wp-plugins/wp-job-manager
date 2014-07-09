@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 3.9
-Stable tag: 1.12.1
+Stable tag: 1.13.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -90,6 +90,14 @@ For more information, [read the documentation](https://wpjobmanager.com/document
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.13.0 =
+* Shortcode arg to show numbered pagination instead of 'load more jobs'. show_pagination argument.
+* Define support for Jetpack publicize.
+* Show company name alt text for company logo.
+* Sort jobs by title, date, expirey date.
+* Added noscript element for jobs shortcode.
+* filter_var to validate URLs on the job submission form.
 
 = 1.12.1 =
 * Job submission form categories must not hide empty categories.
