@@ -8,7 +8,7 @@ class WP_Job_Manager_Post_Types {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'register_post_types' ) );
+		add_action( 'init', array( $this, 'register_post_types' ), 0 );
 		add_filter( 'admin_head', array( $this, 'admin_head' ) );
 		add_filter( 'the_content', array( $this, 'job_content' ) );
 		add_action( 'job_manager_check_for_expired_jobs', array( $this, 'check_for_expired_jobs' ) );
@@ -46,8 +46,8 @@ class WP_Job_Manager_Post_Types {
 		 * Taxonomies
 		 */
 		if ( get_option( 'job_manager_enable_categories' ) ) {
-			$singular  = __( 'Job Category', 'wp-job-manager' );
-			$plural    = __( 'Job Categories', 'wp-job-manager' );
+			$singular  = __( 'Job category', 'wp-job-manager' );
+			$plural    = __( 'Job categories', 'wp-job-manager' );
 
 			if ( current_theme_supports( 'job-manager-templates' ) ) {
 				$rewrite   = array(
@@ -68,16 +68,17 @@ class WP_Job_Manager_Post_Types {
 		            'update_count_callback' => '_update_post_term_count',
 		            'label' 				=> $plural,
 		            'labels' => array(
-	                    'name' 				=> $plural,
-	                    'singular_name' 	=> $singular,
-	                    'search_items' 		=> sprintf( __( 'Search %s', 'wp-job-manager' ), $plural ),
-	                    'all_items' 		=> sprintf( __( 'All %s', 'wp-job-manager' ), $plural ),
-	                    'parent_item' 		=> sprintf( __( 'Parent %s', 'wp-job-manager' ), $singular ),
-	                    'parent_item_colon' => sprintf( __( 'Parent %s:', 'wp-job-manager' ), $singular ),
-	                    'edit_item' 		=> sprintf( __( 'Edit %s', 'wp-job-manager' ), $singular ),
-	                    'update_item' 		=> sprintf( __( 'Update %s', 'wp-job-manager' ), $singular ),
-	                    'add_new_item' 		=> sprintf( __( 'Add New %s', 'wp-job-manager' ), $singular ),
-	                    'new_item_name' 	=> sprintf( __( 'New %s Name', 'wp-job-manager' ),  $singular )
+						'name'              => $plural,
+						'singular_name'     => $singular,
+						'menu_name'         => ucwords( $plural ),
+						'search_items'      => sprintf( __( 'Search %s', 'wp-job-manager' ), $plural ),
+						'all_items'         => sprintf( __( 'All %s', 'wp-job-manager' ), $plural ),
+						'parent_item'       => sprintf( __( 'Parent %s', 'wp-job-manager' ), $singular ),
+						'parent_item_colon' => sprintf( __( 'Parent %s:', 'wp-job-manager' ), $singular ),
+						'edit_item'         => sprintf( __( 'Edit %s', 'wp-job-manager' ), $singular ),
+						'update_item'       => sprintf( __( 'Update %s', 'wp-job-manager' ), $singular ),
+						'add_new_item'      => sprintf( __( 'Add New %s', 'wp-job-manager' ), $singular ),
+						'new_item_name'     => sprintf( __( 'New %s Name', 'wp-job-manager' ),  $singular )
 	            	),
 		            'show_ui' 				=> true,
 		            'public' 	     		=> $public,
@@ -92,8 +93,8 @@ class WP_Job_Manager_Post_Types {
 		    );
 		}
 
-	    $singular  = __( 'Job Type', 'wp-job-manager' );
-		$plural    = __( 'Job Types', 'wp-job-manager' );
+	    $singular  = __( 'Job type', 'wp-job-manager' );
+		$plural    = __( 'Job types', 'wp-job-manager' );
 
 		if ( current_theme_supports( 'job-manager-templates' ) ) {
 			$rewrite   = array(
@@ -115,6 +116,7 @@ class WP_Job_Manager_Post_Types {
 	            'labels' => array(
                     'name' 				=> $plural,
                     'singular_name' 	=> $singular,
+                    'menu_name'         => ucwords( $plural ),
                     'search_items' 		=> sprintf( __( 'Search %s', 'wp-job-manager' ), $plural ),
                     'all_items' 		=> sprintf( __( 'All %s', 'wp-job-manager' ), $plural ),
                     'parent_item' 		=> sprintf( __( 'Parent %s', 'wp-job-manager' ), $singular ),
@@ -139,8 +141,8 @@ class WP_Job_Manager_Post_Types {
 	    /**
 		 * Post types
 		 */
-		$singular  = __( 'Job Listing', 'wp-job-manager' );
-		$plural    = __( 'Job Listings', 'wp-job-manager' );
+		$singular  = __( 'Job', 'wp-job-manager' );
+		$plural    = __( 'Jobs', 'wp-job-manager' );
 
 		if ( current_theme_supports( 'job-manager-templates' ) ) {
 			$has_archive = _x( 'jobs', 'Post type archive slug - resave permalinks after changing this', 'wp-job-manager' );
@@ -160,7 +162,7 @@ class WP_Job_Manager_Post_Types {
 				'labels' => array(
 					'name' 					=> $plural,
 					'singular_name' 		=> $singular,
-					'menu_name'             => $plural,
+					'menu_name'             => __( 'Job Listings', 'wp-job-manager' ),
 					'all_items'             => sprintf( __( 'All %s', 'wp-job-manager' ), $plural ),
 					'add_new' 				=> __( 'Add New', 'wp-job-manager' ),
 					'add_new_item' 			=> sprintf( __( 'Add %s', 'wp-job-manager' ), $singular ),
@@ -174,7 +176,7 @@ class WP_Job_Manager_Post_Types {
 					'not_found_in_trash' 	=> sprintf( __( 'No %s found in trash', 'wp-job-manager' ), $plural ),
 					'parent' 				=> sprintf( __( 'Parent %s', 'wp-job-manager' ), $singular )
 				),
-				'description' => __( 'This is where you can create and manage job listings.', 'wp-job-manager' ),
+				'description' => sprintf( __( 'This is where you can create and manage %s.', 'wp-job-manager' ), $plural ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
 				'capability_type' 		=> 'post',
@@ -307,7 +309,7 @@ class WP_Job_Manager_Post_Types {
 		if ( ! empty( $_GET['job_categories'] ) ) {
 			$args['tax_query'][] = array(
 				'taxonomy' => 'job_listing_category',
-				'field'    => 'id',
+				'field'    => 'slug',
 				'terms'    => explode( ',', sanitize_text_field( $_GET['job_categories'] ) ) + array( 0 )
 			);
 		}
@@ -374,16 +376,18 @@ class WP_Job_Manager_Post_Types {
 		}
 
 		// Delete old expired jobs
-		$job_ids = $wpdb->get_col( $wpdb->prepare( "
-			SELECT posts.ID FROM {$wpdb->posts} as posts
-			WHERE posts.post_type = 'job_listing'
-			AND posts.post_modified < %s
-			AND posts.post_status = 'expired'
-		", date( 'Y-m-d', strtotime( '-30 days', current_time( 'timestamp' ) ) ) ) );
+		if ( apply_filters( 'job_manager_delete_expired_jobs', true ) ) {
+			$job_ids = $wpdb->get_col( $wpdb->prepare( "
+				SELECT posts.ID FROM {$wpdb->posts} as posts
+				WHERE posts.post_type = 'job_listing'
+				AND posts.post_modified < %s
+				AND posts.post_status = 'expired'
+			", date( 'Y-m-d', strtotime( '-' . apply_filters( 'job_manager_delete_expired_jobs_days', 30 ) . ' days', current_time( 'timestamp' ) ) ) ) );
 
-		if ( $job_ids ) {
-			foreach ( $job_ids as $job_id ) {
-				wp_trash_post( $job_id );
+			if ( $job_ids ) {
+				foreach ( $job_ids as $job_id ) {
+					wp_trash_post( $job_id );
+				}
 			}
 		}
 	}

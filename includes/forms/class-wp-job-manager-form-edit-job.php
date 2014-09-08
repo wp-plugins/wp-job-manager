@@ -38,35 +38,27 @@ class WP_Job_Manager_Form_Edit_Job extends WP_Job_Manager_Form_Submit_Job {
 		$job = get_post( self::$job_id );
 
 		if ( empty( self::$job_id  ) || $job->post_status !== 'publish' ) {
-			echo wpautop( __( 'Invalid job', 'wp-job-manager' ) );
+			echo wpautop( __( 'Invalid listing', 'wp-job-manager' ) );
 			return;
 		}
 
 		self::init_fields();
 
-		foreach ( self::$fields as $group_key => $fields ) {
-			foreach ( $fields as $key => $field ) {
-				switch ( $key ) {
-					case 'job_title' :
-						if ( ! isset( self::$fields[ $group_key ][ $key ]['value'] ) )
-							self::$fields[ $group_key ][ $key ]['value'] = $job->post_title;
-					break;
-					case 'job_description' :
-						if ( ! isset( self::$fields[ $group_key ][ $key ]['value'] ) )
-							self::$fields[ $group_key ][ $key ]['value'] = $job->post_content;
-					break;
-					case 'job_type' :
-						if ( ! isset( self::$fields[ $group_key ][ $key ]['value'] ) )
-							self::$fields[ $group_key ][ $key ]['value'] = current( wp_get_object_terms( $job->ID, 'job_listing_type', array( 'fields' => 'slugs' ) ) );
-					break;
-					case 'job_category' :
-						if ( ! isset( self::$fields[ $group_key ][ $key ]['value'] ) )
-							self::$fields[ $group_key ][ $key ]['value'] = current( wp_get_object_terms( $job->ID, 'job_listing_category', array( 'fields' => 'ids' ) ) );
-					break;
-					default:
-						if ( ! isset( self::$fields[ $group_key ][ $key ]['value'] ) )
-							self::$fields[ $group_key ][ $key ]['value'] = get_post_meta( $job->ID, '_' . $key, true );
-					break;
+		foreach ( self::$fields as $group_key => $group_fields ) {
+			foreach ( $group_fields as $key => $field ) {
+				if ( ! isset( self::$fields[ $group_key ][ $key ]['value'] ) ) {
+					if ( 'job_title' === $key ) {
+						self::$fields[ $group_key ][ $key ]['value'] = $job->post_title;
+
+					} elseif ( 'job_description' === $key ) {
+						self::$fields[ $group_key ][ $key ]['value'] = $job->post_content;
+
+					} elseif ( ! empty( $field['taxonomy'] ) ) {
+						self::$fields[ $group_key ][ $key ]['value'] = wp_get_object_terms( $job->ID, $field['taxonomy'], array( 'fields' => 'ids' ) );
+						
+					} else {
+						self::$fields[ $group_key ][ $key ]['value'] = get_post_meta( $job->ID, '_' . $key, true );
+					}
 				}
 			}
 		}
@@ -81,7 +73,7 @@ class WP_Job_Manager_Form_Edit_Job extends WP_Job_Manager_Form_Submit_Job {
 			'action'             => self::get_action(),
 			'job_fields'         => self::get_fields( 'job' ),
 			'company_fields'     => self::get_fields( 'company' ),
-			'submit_button_text' => __( 'Update job listing', 'wp-job-manager' )
+			'submit_button_text' => __( 'Save changes', 'wp-job-manager' )
 			) );
 	}
 
@@ -108,7 +100,7 @@ class WP_Job_Manager_Form_Edit_Job extends WP_Job_Manager_Form_Submit_Job {
 			self::update_job_data( $values );
 
 			// Successful
-			echo '<div class="job-manager-message">' . __( 'Your changes have been saved.', 'wp-job-manager' ), ' <a href="' . get_permalink( self::$job_id ) . '">' . __( 'View Job Listing &rarr;', 'wp-job-manager' ) . '</a>' . '</div>';
+			echo '<div class="job-manager-message">' . __( 'Your changes have been saved.', 'wp-job-manager' ), ' <a href="' . get_permalink( self::$job_id ) . '">' . __( 'View &rarr;', 'wp-job-manager' ) . '</a>' . '</div>';
 
 		} catch ( Exception $e ) {
 			echo '<div class="job-manager-error">' . $e->getMessage() . '</div>';

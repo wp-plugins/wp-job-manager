@@ -24,13 +24,14 @@ class WP_Job_Manager_Writepanels {
 	public function job_listing_fields() {
 		return apply_filters( 'job_manager_job_listing_data_fields', array(
 			'_job_location' => array(
-				'label' => __( 'Job location', 'wp-job-manager' ),
-				'placeholder' => __( 'e.g. "London, UK", "New York", "Houston, TX"', 'wp-job-manager' ),
-				'description' => __( 'Leave this blank if the job can be done from anywhere (i.e. telecommuting)', 'wp-job-manager' )
+				'label' => __( 'Location', 'wp-job-manager' ),
+				'placeholder' => __( 'e.g. "London"', 'wp-job-manager' ),
+				'description' => __( 'Leave this blank if the location is not important', 'wp-job-manager' )
 			),
 			'_application' => array(
 				'label' => __( 'Application email/URL', 'wp-job-manager' ),
-				'placeholder' => __( 'URL or email which applicants use to apply', 'wp-job-manager' )
+				'placeholder' => __( 'URL or email which applicants use to apply', 'wp-job-manager' ),
+				'description' => __( 'This field is required for the "application" area to appear beneath the listing.', 'wp-job-manager' )
 			),
 			'_company_name' => array(
 				'label' => __( 'Company name', 'wp-job-manager' ),
@@ -58,12 +59,12 @@ class WP_Job_Manager_Writepanels {
 				'type'  => 'checkbox'
 			),
 			'_featured' => array(
-				'label' => __( 'Feature this job listing?', 'wp-job-manager' ),
+				'label' => __( 'Feature this listing?', 'wp-job-manager' ),
 				'type'  => 'checkbox',
 				'description' => __( 'Featured listings will be sticky during searches, and can be styled differently.', 'wp-job-manager' )
 			),
 			'_job_expires' => array(
-				'label'       => __( 'Job Expires', 'wp-job-manager' ),
+				'label'       => __( 'Expires', 'wp-job-manager' ),
 				'placeholder' => __( 'yyyy-mm-dd', 'wp-job-manager' )
 			),
 			'_job_author' => array(
@@ -80,7 +81,9 @@ class WP_Job_Manager_Writepanels {
 	 * @return void
 	 */
 	public function add_meta_boxes() {
-		add_meta_box( 'job_listing_data', __( 'Job Listing Data', 'wp-job-manager' ), array( $this, 'job_listing_data' ), 'job_listing', 'normal', 'high' );
+		global $wp_post_types;
+
+		add_meta_box( 'job_listing_data', sprintf( __( '%s Data', 'wp-job-manager' ), $wp_post_types['job_listing']->labels->singular_name ), array( $this, 'job_listing_data' ), 'job_listing', 'normal', 'high' );
 	}
 
 	/**
@@ -92,52 +95,38 @@ class WP_Job_Manager_Writepanels {
 	public function input_file( $key, $field ) {
 		global $thepostid;
 
-		if ( empty( $field['value'] ) )
+		if ( empty( $field['value'] ) ) {
 			$field['value'] = get_post_meta( $thepostid, $key, true );
+		}
+		if ( empty( $field['placeholder'] ) ) {
+			$field['placeholder'] = 'http://';
+		}
 		?>
 		<p class="form-field">
 			<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ) ; ?>:</label>
-			<input type="text" class="file_url" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" placeholder="<?php echo esc_attr( $field['placeholder'] ); ?>" value="<?php echo esc_attr( $field['value'] ); ?>" />
-			<?php if ( ! empty( $field['description'] ) ) : ?><span class="description"><?php echo $field['description']; ?></span><?php endif; ?> <button class="button upload_image_button" data-uploader_button_text="<?php _e( 'Use file', 'wp-job-manager' ); ?>"><?php _e( 'Upload', 'wp-job-manager' ); ?></button>
+
+			<?php if ( ! empty( $field['multiple'] ) ) : ?>
+				<?php foreach ( (array) $field['value'] as $value ) : ?>
+					<span class="file_url">
+						<input type="text" name="<?php echo esc_attr( $key ); ?>[]" placeholder="<?php echo esc_attr( $field['placeholder'] ); ?>" value="<?php echo esc_attr( $value ); ?>" />
+						<button class="button wp_job_manager_upload_file_button" data-uploader_button_text="<?php _e( 'Use file', 'wp-job-manager' ); ?>"><?php _e( 'Upload', 'wp-job-manager' ); ?></button>
+					</span>
+				<?php endforeach; ?>
+			<?php else : ?>
+				<span class="file_url">
+					<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" placeholder="<?php echo esc_attr( $field['placeholder'] ); ?>" value="<?php echo esc_attr( $field['value'] ); ?>" />
+					<button class="button wp_job_manager_upload_file_button" data-uploader_button_text="<?php _e( 'Use file', 'wp-job-manager' ); ?>"><?php _e( 'Upload', 'wp-job-manager' ); ?></button>
+				</span>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $field['description'] ) ) : ?>
+				<span class="description"><?php echo $field['description']; ?></span>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $field['multiple'] ) ) : ?>
+				<button class="button wp_job_manager_add_another_file_button" data-field_name="<?php echo esc_attr( $key ); ?>" data-field_placeholder="<?php echo esc_attr( $field['placeholder'] ); ?>" data-uploader_button_text="<?php _e( 'Use file', 'wp-job-manager' ); ?>" data-uploader_button="<?php _e( 'Upload', 'wp-job-manager' ); ?>"><?php _e( 'Add file', 'wp-job-manager' ); ?></button>
+			<?php endif; ?>
 		</p>
-		<script type="text/javascript">
-			// Uploading files
-			var file_frame;
-			var file_target_input;
-
-			jQuery('.upload_image_button').live('click', function( event ){
-
-			    event.preventDefault();
-
-			    file_target_input = jQuery( this ).closest('.form-field').find('.file_url');
-
-			    // If the media frame already exists, reopen it.
-			    if ( file_frame ) {
-					file_frame.open();
-					return;
-			    }
-
-			    // Create the media frame.
-			    file_frame = wp.media.frames.file_frame = wp.media({
-					title: jQuery( this ).data( 'uploader_title' ),
-					button: {
-						text: jQuery( this ).data( 'uploader_button_text' ),
-					},
-					multiple: false  // Set to true to allow multiple files to be selected
-			    });
-
-			    // When an image is selected, run a callback.
-			    file_frame.on( 'select', function() {
-					// We set multiple to false so only get one image from the uploader
-					attachment = file_frame.state().get('selection').first().toJSON();
-
-					jQuery( file_target_input ).val( attachment.url );
-			    });
-
-			    // Finally, open the modal
-			    file_frame.open();
-			});
-		</script>
 		<?php
 	}
 
@@ -180,7 +169,7 @@ class WP_Job_Manager_Writepanels {
 		</p>
 		<?php
 	}
-	
+
 	/**
 	 * input_select function.
 	 *
@@ -241,7 +230,7 @@ class WP_Job_Manager_Writepanels {
 		if ( empty( $field['value'] ) )
 			$field['value'] = get_post_meta( $thepostid, $key, true );
 		?>
-		<p class="form-field">
+		<p class="form-field form-field-checkbox">
 			<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field['label'] ) ; ?></label>
 			<input type="checkbox" class="checkbox" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( $field['value'], 1 ); ?> />
 			<?php if ( ! empty( $field['description'] ) ) : ?><span class="description"><?php echo $field['description']; ?></span><?php endif; ?>
@@ -274,7 +263,7 @@ class WP_Job_Manager_Writepanels {
 			?>
 			<?php if ( ! empty( $field['description'] ) ) : ?><span class="description"><?php echo $field['description']; ?></span><?php endif; ?>
 		</p>
-		<?php	
+		<?php
 	}
 
 	/**
@@ -387,9 +376,9 @@ class WP_Job_Manager_Writepanels {
 							update_post_meta( $post_id, $key, 0 );
 						}
 					break;
-					default : 
+					default :
 						if ( is_array( $_POST[ $key ] ) ) {
-							update_post_meta( $post_id, $key, array_map( 'sanitize_text_field', $_POST[ $key ] ) );
+							update_post_meta( $post_id, $key, array_filter( array_map( 'sanitize_text_field', $_POST[ $key ] ) ) );
 						} else {
 							update_post_meta( $post_id, $key, sanitize_text_field( $_POST[ $key ] ) );
 						}

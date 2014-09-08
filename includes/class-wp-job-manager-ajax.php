@@ -19,6 +19,8 @@ class WP_Job_Manager_Ajax {
 	 * Get listings via ajax
 	 */
 	public function get_listings() {
+		global $wp_post_types;
+
 		$result             = array();
 		$search_location    = sanitize_text_field( stripslashes( $_POST['search_location'] ) );
 		$search_keywords    = sanitize_text_field( stripslashes( $_POST['search_keywords'] ) );
@@ -47,7 +49,7 @@ class WP_Job_Manager_Ajax {
 		}
 
 		ob_start();
-		
+
 		$jobs = get_job_listings( apply_filters( 'job_manager_get_listings_args', $args ) );
 
 		$result['found_jobs'] = false;
@@ -98,7 +100,7 @@ class WP_Job_Manager_Ajax {
 				foreach ( $search_categories as $category ) {
 					if ( ! is_numeric( $category ) ) {
 						$category_object = get_term_by( 'slug', $category, 'job_listing_category' );
-					} 
+					}
 					if ( is_numeric( $category ) || is_wp_error( $category_object ) || ! $category_object ) {
 						$category_object = get_term_by( 'id', $category, 'job_listing_category' );
 					}
@@ -109,9 +111,9 @@ class WP_Job_Manager_Ajax {
 			}
 
 			if ( $search_keywords ) {
-				$showing_jobs  = sprintf( __( 'Showing %s&ldquo;%s&rdquo; %sjobs', 'wp-job-manager' ), $showing_types, $search_keywords, implode( ', ', $showing_categories ) );
+				$showing_jobs  = sprintf( __( 'Showing %s', 'wp-job-manager' ), $showing_types . '&ldquo;' . $search_keywords . '&rdquo; ' . implode( ', ', $showing_categories ) . $wp_post_types['job_listing']->labels->name );
 			} else {
-				$showing_jobs  = sprintf( __( 'Showing all %s%sjobs', 'wp-job-manager' ), $showing_types, implode( ', ', $showing_categories ) . ' ' );
+				$showing_jobs  = sprintf( __( 'Showing all %s', 'wp-job-manager' ), $showing_types . implode( ', ', $showing_categories ) . ' ' . $wp_post_types['job_listing']->labels->name );
 			}
 
 			$showing_location  = $search_location ? sprintf( ' ' . __( 'located in &ldquo;%s&rdquo;', 'wp-job-manager' ), $search_location ) : '';
@@ -138,7 +140,7 @@ class WP_Job_Manager_Ajax {
 		$result['max_num_pages'] = $jobs->max_num_pages;
 
 		echo '<!--WPJM-->';
-		echo json_encode( apply_filters( 'job_manager_get_listings_result', $result ) );
+		echo json_encode( apply_filters( 'job_manager_get_listings_result', $result, $jobs ) );
 		echo '<!--WPJM_END-->';
 
 		die();

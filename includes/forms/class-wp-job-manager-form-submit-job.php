@@ -128,36 +128,37 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		self::$fields = apply_filters( 'submit_job_form_fields', array(
 			'job' => array(
 				'job_title' => array(
-					'label'       => __( 'Job title', 'wp-job-manager' ),
+					'label'       => __( 'Title', 'wp-job-manager' ),
 					'type'        => 'text',
 					'required'    => true,
 					'placeholder' => '',
 					'priority'    => 1
 				),
 				'job_location' => array(
-					'label'       => __( 'Job location', 'wp-job-manager' ),
-					'description' => __( 'Leave this blank if the job can be done from anywhere (i.e. telecommuting)', 'wp-job-manager' ),
+					'label'       => __( 'Location', 'wp-job-manager' ),
+					'description' => __( 'Leave this blank if the location is not important', 'wp-job-manager' ),
 					'type'        => 'text',
 					'required'    => false,
-					'placeholder' => __( 'e.g. "London, UK", "New York", "Houston, TX"', 'wp-job-manager' ),
+					'placeholder' => __( 'e.g. "London"', 'wp-job-manager' ),
 					'priority'    => 2
 				),
 				'job_type' => array(
 					'label'       => __( 'Job type', 'wp-job-manager' ),
-					'type'        => 'select',
+					'type'        => 'term-select',
 					'required'    => true,
-					'options'     => self::job_types(),
 					'placeholder' => '',
 					'priority'    => 3,
-					'default'     => 'full-time'
+					'default'     => 'full-time',
+					'taxonomy'    => 'job_listing_type'
 				),
 				'job_category' => array(
 					'label'       => __( 'Job category', 'wp-job-manager' ),
-					'type'        => 'job-category',
+					'type'        => 'term-multiselect',
 					'required'    => true,
 					'placeholder' => '',
 					'priority'    => 4,
-					'default'     => ''
+					'default'     => '',
+					'taxonomy'    => 'job_listing_category'
 				),
 				'job_description' => array(
 					'label'       => __( 'Description', 'wp-job-manager' ),
@@ -197,19 +198,26 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 					'maxlength'   => 64,
 					'priority'    => 3
 				),
+				'company_video' => array(
+					'label'       => __( 'Video', 'wp-job-manager' ),
+					'type'        => 'text',
+					'required'    => false,
+					'placeholder' => __( 'A link to a video about your company', 'wp-job-manager' ),
+					'priority'    => 4
+				),
 				'company_twitter' => array(
 					'label'       => __( 'Twitter username', 'wp-job-manager' ),
 					'type'        => 'text',
 					'required'    => false,
 					'placeholder' => __( '@yourcompany', 'wp-job-manager' ),
-					'priority'    => 4
+					'priority'    => 5
 				),
 				'company_logo' => array(
 					'label'       => __( 'Logo', 'wp-job-manager' ),
 					'type'        => 'file',
 					'required'    => false,
 					'placeholder' => '',
-					'priority'    => 5,
+					'priority'    => 6,
 					'allowed_mime_types' => array(
 						'jpg' => 'image/jpeg',
 						'gif' => 'image/gif',
@@ -230,16 +238,16 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * @return array of data
 	 */
 	protected static function get_posted_fields() {
-		
+
 		self::init_fields();
 
 		$values = array();
 
-		foreach ( self::$fields as $group_key => $fields ) {
-			foreach ( $fields as $key => $field ) {
+		foreach ( self::$fields as $group_key => $group_fields ) {
+			foreach ( $group_fields as $key => $field ) {
 				// Get the value
 				$field_type = str_replace( '-', '_', $field['type'] );
-				
+
 				if ( method_exists( __CLASS__, "get_posted_{$field_type}_field" ) ) {
 					$values[ $group_key ][ $key ] = call_user_func( __CLASS__ . "::get_posted_{$field_type}_field", $key, $field );
 				} else {
@@ -258,10 +266,17 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * Get the value of a posted field
 	 * @param  string $key
 	 * @param  array $field
-	 * @return string
+	 * @return string|array
 	 */
 	protected static function get_posted_field( $key, $field ) {
-		return isset( $_POST[ $key ] ) ? sanitize_text_field( trim( urldecode( stripslashes( $_POST[ $key ] ) ) ) ) : '';
+		if ( ! isset( $_POST[ $key ] ) ) {
+			return '';
+		}
+		if ( is_array( $_POST[ $key ] ) ) {
+			return array_map( 'sanitize_text_field', array_map( 'urldecode', stripslashes_deep( $_POST[ $key ] ) ) );
+		} else {
+			return sanitize_text_field( trim( urldecode( stripslashes( $_POST[ $key ] ) ) ) );
+		}
 	}
 
 	/**
@@ -271,20 +286,23 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * @return array
 	 */
 	protected static function get_posted_multiselect_field( $key, $field ) {
-		return isset( $_POST[ $key ] ) ? array_map( 'sanitize_text_field',  $_POST[ $key ] ) : array();
+		return isset( $_POST[ $key ] ) ? array_map( 'sanitize_text_field', $_POST[ $key ] ) : array();
 	}
 
 	/**
 	 * Get the value of a posted file field
 	 * @param  string $key
 	 * @param  array $field
-	 * @return string
+	 * @return string|array
 	 */
 	protected static function get_posted_file_field( $key, $field ) {
 		$file = self::upload_file( $key, $field );
-		
-		if ( ! $file )
+
+		if ( ! $file ) {
 			$file = self::get_posted_field( 'current_' . $key, $field );
+		} elseif ( is_array( $file ) ) {
+			$file = array_filter( array_merge( $file, (array) self::get_posted_field( 'current_' . $key, $field ) ) );
+		}
 
 		return $file;
 	}
@@ -310,15 +328,63 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	}
 
 	/**
+	 * Get posted terms for the taxonomy
+	 * @param  string $key
+	 * @param  array $field
+	 * @return array
+	 */
+	protected static function get_posted_term_checklist_field( $key, $field ) {
+		if ( isset( $_POST[ 'tax_input' ] ) && isset( $_POST[ 'tax_input' ][ $field['taxonomy'] ] ) ) {
+			// Ids were posted
+			return array_map( 'absint', $_POST[ 'tax_input' ][ $field['taxonomy'] ] );
+		} else {
+			return array();
+		}
+	}
+
+	/**
+	 * Get posted terms for the taxonomy
+	 * @param  string $key
+	 * @param  array $field
+	 * @return int
+	 */
+	protected static function get_posted_term_multiselect_field( $key, $field ) {
+		return isset( $_POST[ $key ] ) ? array_map( 'absint', $_POST[ $key ] ) : array();
+	}
+
+	/**
+	 * Get posted terms for the taxonomy
+	 * @param  string $key
+	 * @param  array $field
+	 * @return int
+	 */
+	protected static function get_posted_term_select_field( $key, $field ) {
+		return ! empty( $_POST[ $key ] ) && $_POST[ $key ] > 0 ? absint( $_POST[ $key ] ) : '';
+	}
+
+	/**
 	 * Validate the posted fields
 	 *
 	 * @return bool on success, WP_ERROR on failure
 	 */
 	protected static function validate_fields( $values ) {
-		foreach ( self::$fields as $group_key => $fields ) {
-			foreach ( $fields as $key => $field ) {
+		foreach ( self::$fields as $group_key => $group_fields ) {
+			foreach ( $group_fields as $key => $field ) {
 				if ( $field['required'] && empty( $values[ $group_key ][ $key ] ) ) {
 					return new WP_Error( 'validation-error', sprintf( __( '%s is a required field', 'wp-job-manager' ), $field['label'] ) );
+				}
+				if ( ! empty( $field['taxonomy'] ) && in_array( $field['type'], array( 'term-checklist', 'term-select', 'term-multiselect' ) ) ) {
+					if ( is_array( $values[ $group_key ][ $key ] ) ) {
+						foreach ( $values[ $group_key ][ $key ] as $term ) {
+							if ( ! term_exists( $term, $field['taxonomy'] ) ) {
+								return new WP_Error( 'validation-error', sprintf( __( '%s is invalid', 'wp-job-manager' ), $field['label'] ) );
+							}
+						}
+					} elseif ( ! empty( $values[ $group_key ][ $key ] ) ) {
+						if ( ! term_exists( $values[ $group_key ][ $key ], $field['taxonomy'] ) ) {
+							return new WP_Error( 'validation-error', sprintf( __( '%s is invalid', 'wp-job-manager' ), $field['label'] ) );
+						}
+					}
 				}
 			}
 		}
@@ -367,8 +433,9 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	private static function job_types() {
 		$options = array();
 		$terms   = get_job_listing_types();
-		foreach ( $terms as $term )
+		foreach ( $terms as $term ) {
 			$options[ $term->slug ] = $term->name;
+		}
 		return $options;
 	}
 
@@ -405,8 +472,8 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		// Load data if neccessary
 		if ( ! empty( $_POST['edit_job'] ) && self::$job_id ) {
 			$job = get_post( self::$job_id );
-			foreach ( self::$fields as $group_key => $fields ) {
-				foreach ( $fields as $key => $field ) {
+			foreach ( self::$fields as $group_key => $group_fields ) {
+				foreach ( $group_fields as $key => $field ) {
 					switch ( $key ) {
 						case 'job_title' :
 							self::$fields[ $group_key ][ $key ]['value'] = $job->post_title;
@@ -415,10 +482,10 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 							self::$fields[ $group_key ][ $key ]['value'] = $job->post_content;
 						break;
 						case 'job_type' :
-							self::$fields[ $group_key ][ $key ]['value'] = current( wp_get_object_terms( $job->ID, 'job_listing_type', array( 'fields' => 'slugs' ) ) );
+							self::$fields[ $group_key ][ $key ]['value'] = current( wp_get_object_terms( $job->ID, 'job_listing_type', array( 'fields' => 'ids' ) ) );
 						break;
 						case 'job_category' :
-							self::$fields[ $group_key ][ $key ]['value'] = current( wp_get_object_terms( $job->ID, 'job_listing_category', array( 'fields' => 'ids' ) ) );
+							self::$fields[ $group_key ][ $key ]['value'] = wp_get_object_terms( $job->ID, 'job_listing_category', array( 'fields' => 'ids' ) );
 						break;
 						default:
 							self::$fields[ $group_key ][ $key ]['value'] = get_post_meta( $job->ID, '_' . $key, true );
@@ -454,7 +521,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			'action'             => self::get_action(),
 			'job_fields'         => self::get_fields( 'job' ),
 			'company_fields'     => self::get_fields( 'company' ),
-			'submit_button_text' => __( 'Preview job listing &rarr;', 'wp-job-manager' )
+			'submit_button_text' => __( 'Preview &rarr;', 'wp-job-manager' )
 			) );
 	}
 
@@ -463,10 +530,9 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 */
 	public static function submit_handler() {
 		try {
-				
 			// Init fields
 			self::init_fields();
-			
+
 			// Get posted values
 			$values = self::get_posted_fields();
 
@@ -483,15 +549,18 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			if ( ! is_user_logged_in() ) {
 				$create_account = false;
 
-				if ( job_manager_enable_registration() && ! empty( $_POST['create_account_email'] ) )
+				if ( job_manager_enable_registration() && ! empty( $_POST['create_account_email'] ) ) {
 					$create_account = wp_job_manager_create_account( $_POST['create_account_email'], get_option( 'job_manager_registration_role' ) );
+				}
 
-				if ( is_wp_error( $create_account ) )
+				if ( is_wp_error( $create_account ) ) {
 					throw new Exception( $create_account->get_error_message() );
+				}
 			}
 
-			if ( job_manager_user_requires_account() && ! is_user_logged_in() )
-				throw new Exception( __( 'You must be signed in to post a new job listing.' ) );
+			if ( job_manager_user_requires_account() && ! is_user_logged_in() ) {
+				throw new Exception( __( 'You must be signed in to post a new listing.' ) );
+			}
 
 			// Update the job
 			self::save_job( $values['job']['job_title'], $values['job']['job_description'], self::$job_id ? '' : 'preview', $values );
@@ -514,20 +583,22 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * @param  string $status
 	 */
 	protected static function save_job( $post_title, $post_content, $status = 'preview', $values = array() ) {
-			
 		$job_slug   = array();
 
 		// Prepend with company name
-		if ( ! empty( $values['company']['company_name'] ) )
+		if ( ! empty( $values['company']['company_name'] ) ) {
 			$job_slug[] = $values['company']['company_name'];
+		}
 
 		// Prepend location
-		if ( ! empty( $values['job']['job_location'] ) )
+		if ( ! empty( $values['job']['job_location'] ) ) {
 			$job_slug[] = $values['job']['job_location'];
+		}
 
 		// Prepend with job type
-		if ( ! empty( $values['job']['job_type'] ) )
+		if ( ! empty( $values['job']['job_type'] ) ) {
 			$job_slug[] = $values['job']['job_type'];
+		}
 
 		$job_slug[] = $post_title;
 
@@ -539,8 +610,9 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			'comment_status' => 'closed'
 		), $post_title, $post_content, $status, $values );
 
-		if ( $status )
+		if ( $status ) {
 			$job_data['post_status'] = $status;
+		}
 
 		if ( self::$job_id ) {
 			$job_data['ID'] = self::$job_id;
@@ -556,31 +628,91 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * @param  array $values
 	 */
 	protected static function update_job_data( $values ) {
-
-		wp_set_object_terms( self::$job_id, array( $values['job']['job_type'] ), 'job_listing_type', false );
-
-		if ( get_option( 'job_manager_enable_categories' ) && isset( $values['job']['job_category'] ) ) {
-			$posted_cats = array_map( 'absint', is_array( $values['job']['job_category'] ) ? $values['job']['job_category'] : array( $values['job']['job_category'] ) );
-			wp_set_object_terms( self::$job_id, $posted_cats, 'job_listing_category', false );
-		}
-
-		update_post_meta( self::$job_id, '_application', $values['job']['application'] );
-		update_post_meta( self::$job_id, '_job_location', $values['job']['job_location'] );
-		update_post_meta( self::$job_id, '_company_name', $values['company']['company_name'] );
-		update_post_meta( self::$job_id, '_company_website', $values['company']['company_website'] );
-		update_post_meta( self::$job_id, '_company_tagline', $values['company']['company_tagline'] );
-		update_post_meta( self::$job_id, '_company_twitter', $values['company']['company_twitter'] );
-		update_post_meta( self::$job_id, '_company_logo', $values['company']['company_logo'] );
+		// Set defaults
 		add_post_meta( self::$job_id, '_filled', 0, true );
 		add_post_meta( self::$job_id, '_featured', 0, true );
 
+		$maybe_attach = array();
+
+		// Loop fields and save meta and term data
+		foreach ( self::$fields as $group_key => $group_fields ) {
+			foreach ( $group_fields as $key => $field ) {
+				// Save taxonomies
+				if ( ! empty( $field['taxonomy'] ) ) {
+					if ( is_array( $values[ $group_key ][ $key ] ) ) {
+						wp_set_object_terms( self::$job_id, $values[ $group_key ][ $key ], $field['taxonomy'], false );
+					} else {
+						wp_set_object_terms( self::$job_id, array( $values[ $group_key ][ $key ] ), $field['taxonomy'], false );
+					}
+
+				// Save meta data
+				} else {
+					update_post_meta( self::$job_id, '_' . $key, $values[ $group_key ][ $key ] );
+				}
+
+				// Handle attachments
+				if ( 'file' === $field['type'] ) {
+					// Must be absolute
+					if ( is_array( $values[ $group_key ][ $key ] ) ) {
+						foreach ( $values[ $group_key ][ $key ] as $file_url ) {
+							if ( strstr( $file_url, WP_CONTENT_URL ) ) {
+								$maybe_attach[] = str_replace( WP_CONTENT_URL, WP_CONTENT_DIR, $file_url );
+							}
+						}
+					} else {
+						if ( strstr( $values[ $group_key ][ $key ], WP_CONTENT_URL ) ) {
+							$maybe_attach[] = str_replace( WP_CONTENT_URL, WP_CONTENT_DIR, $values[ $group_key ][ $key ] );
+						}
+					}
+				}
+			}
+		}
+
+		// Handle attachments
+		if ( sizeof( $maybe_attach ) ) {
+			/** WordPress Administration Image API */
+			include_once( ABSPATH . 'wp-admin/includes/image.php' );
+
+			// Get attachments
+			$attachments     = get_posts( 'post_parent=' . self::$job_id . '&post_type=attachment&fields=ids&post_mime_type=image&numberposts=-1' );
+			$attachment_urls = array();
+
+			// Loop attachments already attached to the job
+			foreach ( $attachments as $attachment_key => $attachment ) {
+				$attachment_urls[] = wp_get_attachment_url( $attachment );
+			}
+
+			foreach ( $maybe_attach as $attachment_url ) {
+				if ( ! in_array( $attachment_url, $attachment_urls ) ) {
+					$attachment = array(
+						'post_title'   => get_the_title( self::$job_id ),
+						'post_content' => '',
+						'post_status'  => 'inherit',
+						'post_parent'  => self::$job_id,
+						'guid'         => $attachment_url
+					);
+
+					if ( $info = wp_check_filetype( $attachment_url ) ) {
+						$attachment['post_mime_type'] = $info['type'];
+					}
+
+					$attachment_id = wp_insert_attachment( $attachment, $attachment_url, self::$job_id );
+
+					if ( ! is_wp_error( $attachment_id ) ) {
+						wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $attachment_url ) );
+					}
+				}
+			}
+		}
+
 		// And user meta to save time in future
 		if ( is_user_logged_in() ) {
-			update_user_meta( get_current_user_id(), '_company_name', $values['company']['company_name'] );
-			update_user_meta( get_current_user_id(), '_company_website', $values['company']['company_website'] );
-			update_user_meta( get_current_user_id(), '_company_tagline', $values['company']['company_tagline'] );
-			update_user_meta( get_current_user_id(), '_company_twitter', $values['company']['company_twitter'] );
-			update_user_meta( get_current_user_id(), '_company_logo', $values['company']['company_logo'] );
+			update_user_meta( get_current_user_id(), '_company_name', isset( $values['company']['company_name'] ) ? $values['company']['company_name'] : '' );
+			update_user_meta( get_current_user_id(), '_company_website', isset( $values['company']['company_name'] ) ? $values['company']['company_website'] : '' );
+			update_user_meta( get_current_user_id(), '_company_tagline', isset( $values['company']['company_name'] ) ? $values['company']['company_tagline'] : '' );
+			update_user_meta( get_current_user_id(), '_company_twitter', isset( $values['company']['company_name'] ) ? $values['company']['company_twitter'] : '' );
+			update_user_meta( get_current_user_id(), '_company_logo', isset( $values['company']['company_name'] ) ? $values['company']['company_logo'] : '' );
+			update_user_meta( get_current_user_id(), '_company_video', isset( $values['company']['company_video'] ) ? $values['company']['company_video'] : '' );
 		}
 
 		do_action( 'job_manager_update_job_data', self::$job_id, $values );
@@ -624,8 +756,9 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * Preview Step Form handler
 	 */
 	public static function preview_handler() {
-		if ( ! $_POST )
+		if ( ! $_POST ) {
 			return;
+		}
 
 		// Edit = show submit form again
 		if ( ! empty( $_POST['edit_job'] ) ) {
@@ -637,6 +770,10 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			$job = get_post( self::$job_id );
 
 			if ( in_array( $job->post_status, array( 'preview', 'expired' ) ) ) {
+				// Reset expirey
+				delete_post_meta( $job->ID, '_job_expires' );
+
+				// Update job listing
 				$update_job                  = array();
 				$update_job['ID']            = $job->ID;
 				$update_job['post_status']   = get_option( 'job_manager_submission_requires_approval' ) ? 'pending' : 'publish';
@@ -667,6 +804,8 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 
 	/**
 	 * Upload a file
+	 *
+	 * @return  string or array
 	 */
 	public static function upload_file( $field_key, $field ) {
 
@@ -677,7 +816,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		include_once( ABSPATH . 'wp-admin/includes/media.php' );
 
 		if ( isset( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ]['name'] ) ) {
-			$file   = $_FILES[ $field_key ];
+			$file = $_FILES[ $field_key ];
 
 			if ( ! empty( $field['allowed_mime_types'] ) ) {
 				$allowed_mime_types = $field['allowed_mime_types'];
@@ -685,19 +824,55 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 				$allowed_mime_types = get_allowed_mime_types();
 			}
 
-			if ( ! in_array( $_FILES[ $field_key ]["type"], $allowed_mime_types ) )
-    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $_FILES[ $field_key ]["type"], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
+			if ( empty( $file['name'] ) ) {
+				return false;
+			}
 
-			add_filter( 'upload_dir',  array( __CLASS__, 'upload_dir' ) );
+			if ( is_array( $file['name'] ) ) {
+				$file_urls = array();
 
-			$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
+				foreach ( $file['name'] as $key => $value ) {
+					if ( ! empty( $file['name'][ $key ] ) ) {
 
-			remove_filter('upload_dir', array( __CLASS__, 'upload_dir' ) );
+						if ( ! in_array( $file['type'][ $key ], $allowed_mime_types ) ) {
+			    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $file['type'][ $key ], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
+						}
 
-			if ( ! empty( $upload['error'] ) ) {
-				throw new Exception( $upload['error'] );
+						$upload_file = array(
+							'name'     => $file['name'][ $key ],
+							'type'     => $file['type'][ $key ],
+							'tmp_name' => $file['tmp_name'][ $key ],
+							'error'    => $file['error'][ $key ],
+							'size'     => $file['size'][ $key ]
+						);
+
+						add_filter( 'upload_dir',  array( __CLASS__, 'upload_dir' ) );
+						$upload = wp_handle_upload( $upload_file, array( 'test_form' => false ) );
+						remove_filter( 'upload_dir', array( __CLASS__, 'upload_dir' ) );
+
+						if ( ! empty( $upload['error'] ) ) {
+							throw new Exception( $upload['error'] );
+						}
+
+						$file_urls[] = $upload['url'];
+					}
+				}
+
+				return $file_urls;
 			} else {
-				return $upload['url'];
+				if ( ! in_array( $file['type'], $allowed_mime_types ) ) {
+	    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $file['type'], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
+				}
+
+				add_filter( 'upload_dir',  array( __CLASS__, 'upload_dir' ) );
+				$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
+				remove_filter( 'upload_dir', array( __CLASS__, 'upload_dir' ) );
+
+				if ( ! empty( $upload['error'] ) ) {
+					throw new Exception( $upload['error'] );
+				} else {
+					return $upload['url'];
+				}
 			}
 		}
 	}
@@ -706,10 +881,16 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * Filter the upload directory
 	 */
 	public static function upload_dir( $pathdata ) {
-		$subdir             = '/job_listings';
-		$pathdata['path']   = str_replace( $pathdata['subdir'], $subdir, $pathdata['path'] );
-		$pathdata['url']    = str_replace( $pathdata['subdir'], $subdir, $pathdata['url'] );
-		$pathdata['subdir'] = str_replace( $pathdata['subdir'], $subdir, $pathdata['subdir'] );
+		if ( empty( $pathdata['subdir'] ) ) {
+			$pathdata['path']   = $pathdata['path'] . '/job_listings';
+			$pathdata['url']    = $pathdata['url']. '/job_listings';
+			$pathdata['subdir'] = '/job_listings';
+		} else {
+			$new_subdir         = '/job_listings' . $pathdata['subdir'];
+			$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+			$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+			$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
+		}
 		return $pathdata;
 	}
 }

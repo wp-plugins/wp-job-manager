@@ -45,11 +45,6 @@
 	list-style:none outside;
 	.clearfix;
 	width: auto;
-	-webkit-box-shadow:
-		inset 0 -2px 6px rgba(0,0,0,0.05),
-		inset 0 -2px 30px rgba(0,0,0,0.015),
-		inset 0 1px 0 #fff,
-		0 1px 2px rgba(0,0,0,0.3);
 	box-shadow:
 		inset 0 -2px 6px rgba(0,0,0,0.05),
 		inset 0 -2px 30px rgba(0,0,0,0.015),
@@ -164,21 +159,51 @@
 			display: block;
 			line-height: 1.2em;
 		}
-		.job-manager-uploaded-file {
-			line-height: 64px;
-			font-style: italic;
-			margin: 0 0 1em 0;
-			img {
-				height: 64px;
-				vertical-align: middle;
-				margin: 0 1em 0 0;
+		.job-manager-uploaded-files {
+			display: table;
+			.job-manager-uploaded-file {
+				line-height: 1.5em;
+				font-style: italic;
+				display: table-row;
+				.job-manager-uploaded-file-preview {
+					display: table-cell;
+					vertical-align: middle;
+					padding: .5em 0 .5em 0;
+					img {
+						height: 64px;
+						margin: 0;
+					}
+				}
+				.job-manager-uploaded-file-name {
+					display: table-cell;
+					vertical-align: middle;
+					padding: .5em 0 .5em 1em;
+				}
 			}
 		}
 	}
 	.submit-job {
 		padding: 1em 0;
 	}
-
+	.job-manager-term-checklist {
+		list-style: none outside;
+		max-height: 200px;
+		overflow: auto;
+		margin: 0;
+		li {
+			list-style: none outside;
+			margin: 0;
+			display: block;
+			float: none;
+			label {
+				width: auto;
+				float: none;
+			}
+			li {
+				margin: 0 0 0 2em;
+			}
+		}
+	}
 }
 div.job_listings {
 	margin-bottom: 1em;
@@ -357,15 +382,16 @@ ul.job_listings {
 	.company {
 		position: relative;
 		border: 1px solid #eee;
-		padding: 1em 1em 1em 42px;
+		padding: 1em;
 		margin: 0 0 2em;
 		display: block;
 		clear: both;
-		min-height: 42px;
+		min-height: 3em;
+		box-shadow: 0 1px 1px rgba(0,0,0,0.1);
 
 		img {
-			width: 42px;
-			height: 42px;
+			width: 3em;
+			height: 3em;
 			position: absolute;
 			left: 1em;
 			float: left;
@@ -373,8 +399,9 @@ ul.job_listings {
 			box-shadow: none;
 		}
 		.name {
-			margin: 0;
-			padding: 0 0 0 2em;
+			margin: 0 0 0 3em;
+			padding: 0 0 0 1em;
+			line-height: 1.5em;
 			a {
 				float: right;
 				margin-left: 1em;
@@ -382,8 +409,9 @@ ul.job_listings {
 		}
 		.tagline {
 			display: block;
-			margin: 0;
-			padding: 0 0 0 2em;
+			margin: 0 0 0 42px;
+			padding: 0 0 0 1em;
+			line-height: 1.5em;
 			font-style: italic;
 			color: #999;
 		}
@@ -394,6 +422,15 @@ ul.job_listings {
 		.company_twitter:before {
 			.display-icon;
 			content: '\e80a';
+		}
+		.company_video {
+			border-top: 1px solid #eee;
+			padding: 1em 0 0;
+			margin: 1em 0 0 0;
+			iframe {
+				margin: 0;
+				display: block;
+			}
 		}
 	}
 	.meta {
@@ -448,7 +485,7 @@ ul.job_listings {
 	.application {
 		padding: 0;
 		margin: 0 0 1em;
-		
+
 		.application_button, .application_details {
 			-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 			-moz-box-sizing: border-box;    /* Firefox, other Gecko */
@@ -512,7 +549,6 @@ ul.job_listings {
 		padding: 1em;
 		.clearfix;
 		div {
-			width: 50%;
 			-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
 			-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 			box-sizing: border-box;         /* Opera/IE 8+ */
@@ -523,22 +559,26 @@ ul.job_listings {
 			&.search_keywords, &.filter_first {
 				float: left;
 				padding-right: .5em;
+				width: 50%;
 			}
 			&.search_location, &.filter_last {
 				float: right;
 				padding-left: .5em;
+				width: 50%;
 			}
 			&.search_categories, &.filter_wide {
 				padding-top: .5em;
 				clear: both;
 				width: 100%;
 			}
-			a {
-				padding: .25em;
-			}
-			a.active {
-				background: #ddd;
-				text-decoration: none;
+			.showing_jobs {
+				a {
+					padding: .25em;
+				}
+				a.active {
+					background: #ddd;
+					text-decoration: none;
+				}
 			}
 		}
 		input, select {
