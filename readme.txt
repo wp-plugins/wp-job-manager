@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.14.0
+Stable tag: 1.15.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -90,6 +90,17 @@ For more information, [read the documentation](https://wpjobmanager.com/document
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.15.0 =
+* Added location/keyword option to recent jobs widget.
+* Added job-listings-start and job-listings-end.php templates for customisation the wrapping elements.
+* Added filter type option for job categories. Can be set to require matching to any or all selected categories.
+* Added checkbox field type for forms.
+* Made backend application email field default to logged in user.
+* Fix - job_manager_get_resized_image to not error when it cannot read the image file.
+* Fix - Make admin_url relative.
+* Fix - Chosen CSS cutting off the placeholder in Firefox.
+* Fix - Added _company_video in backend.
 
 = 1.14.0 =
 * Extra filters for the filters template.

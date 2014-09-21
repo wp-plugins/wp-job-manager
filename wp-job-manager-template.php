@@ -218,8 +218,9 @@ function get_the_job_application_method( $post = null ) {
  * @return void
  */
 function the_job_type( $post = null ) {
-	if ( $job_type = get_the_job_type( $post ) )
+	if ( $job_type = get_the_job_type( $post ) ) {
 		echo $job_type->name;
+	}
 }
 
 /**
@@ -231,15 +232,17 @@ function the_job_type( $post = null ) {
  */
 function get_the_job_type( $post = null ) {
 	$post = get_post( $post );
-	if ( $post->post_type !== 'job_listing' )
+	if ( $post->post_type !== 'job_listing' ) {
 		return;
+	}
 
 	$types = wp_get_post_terms( $post->ID, 'job_listing_type' );
 
-	if ( $types )
+	if ( $types ) {
 		$type = current( $types );
-	else
+	} else {
 		$type = false;
+	}
 
 	return apply_filters( 'the_job_type', $type, $post );
 }
@@ -327,7 +330,9 @@ function get_the_company_logo( $post = null ) {
 function job_manager_get_resized_image( $logo, $size ) {
 	global $_wp_additional_image_sizes;
 
-	if ( $size !== 'full' && ( isset( $_wp_additional_image_sizes[ $size ] ) || in_array( $size, array( 'thumbnail', 'medium', 'large' ) ) ) ) {
+	ob_start();
+
+	if ( $size !== 'full' && strstr( $logo, WP_CONTENT_URL ) && ( isset( $_wp_additional_image_sizes[ $size ] ) || in_array( $size, array( 'thumbnail', 'medium', 'large' ) ) ) ) {
 
 		if ( in_array( $size, array( 'thumbnail', 'medium', 'large' ) ) ) {
 			$img_width  = get_option( $size . '_size_w' );
@@ -349,15 +354,18 @@ function job_manager_get_resized_image( $logo, $size ) {
 			$image = wp_get_image_editor( $logo_path );
 
 			if ( ! is_wp_error( $image ) ) {
-			    $image->resize( $img_width, $img_height, $img_crop );
-			    $image->save( $resized_logo_path );
-
-			    $logo = dirname( $logo ) . '/' . basename( $resized_logo_path );
+			   	if ( is_wp_error( $image->resize( $img_width, $img_height, $img_crop ) ) ) {
+					if ( ! is_wp_error( $image->save( $resized_logo_path ) ) ) {
+						$logo = dirname( $logo ) . '/' . basename( $resized_logo_path );
+					}
+				}
 			}
 		} else {
 			$logo = dirname( $logo ) . '/' . basename( $resized_logo_path );
 		}
 	}
+
+	ob_end_clean();
 
 	return $logo;
 }
@@ -556,7 +564,7 @@ function get_job_listing_class( $class = '', $post_id = null ) {
 	if ( $post->post_type !== 'job_listing' ) {
 		return array();
 	}
-	
+
 	$classes = array();
 
 	if ( empty( $post ) ) {
@@ -564,7 +572,9 @@ function get_job_listing_class( $class = '', $post_id = null ) {
 	}
 
 	$classes[] = 'job_listing';
-	$classes[] = 'job-type-' . sanitize_title( get_the_job_type()->name );
+	if ( $job_type = get_the_job_type() ) {
+		$classes[] = 'job-type-' . sanitize_title( $job_type->name );
+	}
 
 	if ( is_position_filled( $post ) ) {
 		$classes[] = 'job_position_filled';
@@ -573,7 +583,7 @@ function get_job_listing_class( $class = '', $post_id = null ) {
 	if ( is_position_featured( $post ) ) {
 		$classes[] = 'job_position_featured';
 	}
-	
+
 	if ( ! empty( $class ) ) {
 		if ( ! is_array( $class ) ) {
 			$class = preg_split( '#\s+#', $class );
