@@ -36,7 +36,7 @@ class WP_Job_Manager_Writepanels {
 				'label'       => __( 'Application email/URL', 'wp-job-manager' ),
 				'placeholder' => __( 'URL or email which applicants use to apply', 'wp-job-manager' ),
 				'description' => __( 'This field is required for the "application" area to appear beneath the listing.', 'wp-job-manager' ),
-				'value'       => ( $value = get_post_meta( $post->ID, '_application', true ) ) ? $value : $current_user->user_email
+				'value'       => metadata_exists( 'post', $post->ID, '_application' ) ? get_post_meta( $post->ID, '_application', true ) : $current_user->user_email
 			),
 			'_company_name' => array(
 				'label' => __( 'Company name', 'wp-job-manager' ),
@@ -387,7 +387,9 @@ class WP_Job_Manager_Writepanels {
 						}
 					break;
 					default :
-						if ( is_array( $_POST[ $key ] ) ) {
+						if ( ! isset( $_POST[ $key ] ) ) {
+							continue;
+						} elseif ( is_array( $_POST[ $key ] ) ) {
 							update_post_meta( $post_id, $key, array_filter( array_map( 'sanitize_text_field', $_POST[ $key ] ) ) );
 						} else {
 							update_post_meta( $post_id, $key, sanitize_text_field( $_POST[ $key ] ) );

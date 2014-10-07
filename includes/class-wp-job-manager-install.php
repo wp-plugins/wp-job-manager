@@ -18,7 +18,23 @@ class WP_Job_Manager_Install {
 		$this->default_terms();
 		$this->cron();
 		delete_transient( 'wp_job_manager_addons_html' );
+
+		// Redirect to setup screen for new insalls
+		if ( ! get_option( 'wp_job_manager_version' ) ) {
+			set_transient( '_job_manager_activation_redirect', 1, HOUR_IN_SECONDS );
+		}
+
 		update_option( 'wp_job_manager_version', JOB_MANAGER_VERSION );
+
+		// Update legacy options
+		if ( false === get_option( 'job_manager_submit_job_form_page_id', false ) && get_option( 'job_manager_submit_page_slug' ) ) {
+			$page_id = get_page_by_path( get_option( 'job_manager_submit_page_slug' ) )->ID;
+			update_option( 'job_manager_submit_job_form_page_id', $page_id );
+		}
+		if ( false === get_option( 'job_manager_job_dashboard_page_id', false ) && get_option( 'job_manager_job_dashboard_page_slug' ) ) {
+			$page_id = get_page_by_path( get_option( 'job_manager_job_dashboard_page_slug' ) )->ID;
+			update_option( 'job_manager_job_dashboard_page_id', $page_id );
+		}
 	}
 
 	/**
