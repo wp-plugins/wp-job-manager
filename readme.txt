@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.16.0
+Stable tag: 1.16.1
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -118,6 +118,12 @@ You can view (and contribute) translations via the [Transifex project here](http
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.16.1 =
+* Fix - Use triggerHandler() instead of trigger() in ajax-filters to prevent events bubbling up.
+* Fix - Append current 'lang' to AJAX calls for WPML.
+* Fix - When specifying categories on the jobs shortcode, don't clear those categories on reset.
+* Tweak - Added job_manager_admin_screen_ids filter.
 
 = 1.16.0 =
 * Added setup wizard for new installs that creates pages/shortcodes automatically.
