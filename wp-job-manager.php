@@ -3,7 +3,7 @@
 Plugin Name: WP Job Manager
 Plugin URI: https://wpjobmanager.com/
 Description: Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
-Version: 1.16.1
+Version: 1.17.0
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.8
@@ -31,7 +31,7 @@ class WP_Job_Manager {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'JOB_MANAGER_VERSION', '1.16.1' );
+		define( 'JOB_MANAGER_VERSION', '1.17.0' );
 		define( 'JOB_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
@@ -96,8 +96,8 @@ class WP_Job_Manager {
 		$ajax_url = admin_url( 'admin-ajax.php', 'relative' );
 
 		// WPML workaround until this is standardized
-		if ( class_exists( 'SitePress' ) ) {
-			add_query_arg( 'lang', $GLOBALS['sitepress']->get_current_language(), $ajax_url );
+		if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+			$ajax_url = add_query_arg( 'lang', ICL_LANGUAGE_CODE, $ajax_url );
 		}
 
 		wp_register_script( 'wp-job-manager-ajax-filters', JOB_MANAGER_PLUGIN_URL . '/assets/js/ajax-filters.min.js', array( 'jquery', 'chosen' ), JOB_MANAGER_VERSION, true );
