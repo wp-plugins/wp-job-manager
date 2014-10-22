@@ -262,6 +262,26 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		return $values;
 	}
 
+
+	/**
+	 * Navigates through an array and sanitizes the field.
+	 *
+	 *
+	 * @param array|string $value The array or string to be sanitized.
+	 * @return array|string $value The sanitized array (or string from the callback).
+	 */
+	public static function sanitize_posted_field( $value ) {
+		// Decode URLs
+		if ( is_string( $value ) && ( strstr( $value, 'http:' ) || strstr( $value, 'https:' ) ) ) {
+			$value = urldecode( $value );
+		}
+
+		// Santize value
+		$value = is_array( $value ) ? array_map( array( __CLASS__, 'sanitize_posted_field' ), $value ) : sanitize_text_field( stripslashes( trim( $value ) ) );
+
+		return $value;
+	}
+
 	/**
 	 * Get the value of a posted field
 	 * @param  string $key
@@ -269,14 +289,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * @return string|array
 	 */
 	protected static function get_posted_field( $key, $field ) {
-		if ( ! isset( $_POST[ $key ] ) ) {
-			return '';
-		}
-		if ( is_array( $_POST[ $key ] ) ) {
-			return array_map( 'sanitize_text_field', array_map( 'urldecode', stripslashes_deep( $_POST[ $key ] ) ) );
-		} else {
-			return sanitize_text_field( trim( urldecode( stripslashes( $_POST[ $key ] ) ) ) );
-		}
+		return isset( $_POST[ $key ] ) ? self::sanitize_posted_field( $_POST[ $key ] ) : '';
 	}
 
 	/**
@@ -392,6 +405,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		// Application method
 		if ( isset( $values['job']['application'] ) && ! empty( $values['job']['application'] ) ) {
 			$allowed_application_method = get_option( 'job_manager_allowed_application_method', '' );
+			$values['job']['application'] = str_replace( ' ', '+', $values['job']['application'] );
 			switch ( $allowed_application_method ) {
 				case 'email' :
 					if ( ! is_email( $values['job']['application'] ) ) {
@@ -521,8 +535,8 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			'action'             => self::get_action(),
 			'job_fields'         => self::get_fields( 'job' ),
 			'company_fields'     => self::get_fields( 'company' ),
-			'submit_button_text' => __( 'Preview &rarr;', 'wp-job-manager' )
-			) );
+			'submit_button_text' => apply_filters( 'submit_job_form_submit_button_text', __( 'Preview &rarr;', 'wp-job-manager' ) )
+		) );
 	}
 
 	/**
