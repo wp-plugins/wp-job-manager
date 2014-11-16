@@ -28,6 +28,9 @@ class WP_Job_Manager_Post_Types {
 
 		add_action( 'job_manager_application_details_email', array( $this, 'application_details_email' ) );
 		add_action( 'job_manager_application_details_url', array( $this, 'application_details_url' ) );
+
+		add_filter( 'wp_insert_post_data', array( $this, 'fix_post_name' ), 10, 2 );
+		add_action( 'update_post_meta', array( $this, 'maybe_generate_geolocation_data' ), 10, 4 );
 	}
 
 	/**
@@ -179,18 +182,8 @@ class WP_Job_Manager_Post_Types {
 				'description' => sprintf( __( 'This is where you can create and manage %s.', 'wp-job-manager' ), $plural ),
 				'public' 				=> true,
 				'show_ui' 				=> true,
-				'capability_type' 		=> 'post',
-				'capabilities' => array(
-					'publish_posts' 		=> $admin_capability,
-					'edit_posts' 			=> $admin_capability,
-					'edit_others_posts' 	=> $admin_capability,
-					'delete_posts' 			=> $admin_capability,
-					'delete_others_posts'	=> $admin_capability,
-					'read_private_posts'	=> $admin_capability,
-					'edit_post' 			=> $admin_capability,
-					'delete_post' 			=> $admin_capability,
-					'read_post' 			=> 'read_job_listing'
-				),
+				'capability_type' 		=> 'job_listing',
+				'map_meta_cap'          => true,
 				'publicly_queryable' 	=> true,
 				'exclude_from_search' 	=> false,
 				'hierarchical' 			=> false,
@@ -339,13 +332,13 @@ class WP_Job_Manager_Post_Types {
 		$company  = get_the_company_name( $post_id );
 
 		if ( $location ) {
-			echo "<job_listing:location>{$location}</job_listing:location>\n";
+			echo "<job_listing:location>" . esc_html( $location ) . "</job_listing:location>\n";
 		}
 		if ( $job_type ) {
-			echo "<job_listing:job_type>{$job_type->name}</job_listing:job_type>\n";
+			echo "<job_listing:job_type>" . esc_html( $job_type->name ) . "</job_listing:job_type>\n";
 		}
 		if ( $company ) {
-			echo "<job_listing:company>{$company}</job_listing:company>\n";
+			echo "<job_listing:company>" . esc_html( $company ) . "</job_listing:company>\n";
 		}
 	}
 
@@ -460,5 +453,29 @@ class WP_Job_Manager_Post_Types {
 	 */
 	public function application_details_url( $apply ) {
 		get_job_manager_template( 'job-application-url.php', array( 'apply' => $apply ) );
+	}
+
+	/**
+	 * Fix post name when wp_update_post changes it
+	 * @param  array $data
+	 * @return array
+	 */
+	public function fix_post_name( $data, $postarr ) {
+		 if ( 'job_listing' === $data['post_type'] && 'pending' === $data['post_status'] && ! current_user_can( 'publish_posts' ) ) {
+				$data['post_name'] = $postarr['post_name'];
+		 }
+		 return $data;
+	}
+
+	/**
+	 * Generate location data if a post is saved
+	 * @param  int $post_id
+	 * @param  array $post
+	 */
+	public function maybe_generate_geolocation_data( $meta_id, $object_id, $meta_key, $_meta_value ) {
+		if ( '_job_location' !== $meta_key || 'job_listing' !== get_post_type( $object_id ) ) {
+			return;
+		}
+		do_action( 'job_manager_job_location_edited', $object_id, $_meta_value );
 	}
 }

@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.17.0
+Stable tag: 1.18.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -118,6 +118,15 @@ You can view (and contribute) translations via the [Transifex project here](http
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.18.0 =
+* Fix - Keep post name when pending job is posted by non-admin.
+* Fix - Prevent special chars breaking the feeds.
+* Tweak - Added new capabilities for all aspects of Job Listing Management. e.g. edit_job_listings, add_job_listing etc etc. Admin role will be updated on activation/upgrade. If you use custom roles, you'll need to edit them to grant access to the parts you wish.
+* Tweak - Improved uninstaller.
+* Tweak - Clear location data should include geolocation_postcode.
+* Tweak - Always show 'showing' bar, but conditonally show 'reset' link.
+* Tweak - Trigger geolocation whenever location field is saved, even by 3rd parties.
 
 = 1.17.0 =
 * Feature - job_manager_user_can_edit_pending_submissions function and setting.
