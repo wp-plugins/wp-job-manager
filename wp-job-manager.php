@@ -3,11 +3,11 @@
 Plugin Name: WP Job Manager
 Plugin URI: https://wpjobmanager.com/
 Description: Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
-Version: 1.18.0
+Version: 1.19.0
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.8
-Tested up to: 4.0
+Tested up to: 4.1
 Text Domain: wp-job-manager
 Domain Path: /languages
 
@@ -31,7 +31,7 @@ class WP_Job_Manager {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'JOB_MANAGER_VERSION', '1.18.0' );
+		define( 'JOB_MANAGER_VERSION', '1.19.0' );
 		define( 'JOB_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
@@ -79,6 +79,9 @@ class WP_Job_Manager {
 	 * Localisation
 	 */
 	public function load_plugin_textdomain() {
+		$locale = apply_filters( 'plugin_locale', get_locale(), 'wp-job-manager' );
+
+		load_textdomain( 'wp-job-manager', WP_LANG_DIR . "/wp-job-manager/wp-job-manager-$locale.mo" );
 		load_plugin_textdomain( 'wp-job-manager', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
@@ -94,28 +97,33 @@ class WP_Job_Manager {
 	 * Register and enqueue scripts and css
 	 */
 	public function frontend_scripts() {
-		$ajax_url = admin_url( 'admin-ajax.php', 'relative' );
+		$ajax_url         = admin_url( 'admin-ajax.php', 'relative' );
+		$ajax_filter_deps = array( 'jquery' );
 
 		// WPML workaround until this is standardized
 		if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
 			$ajax_url = add_query_arg( 'lang', ICL_LANGUAGE_CODE, $ajax_url );
 		}
 
-		wp_register_script( 'wp-job-manager-ajax-filters', JOB_MANAGER_PLUGIN_URL . '/assets/js/ajax-filters.min.js', array( 'jquery', 'chosen' ), JOB_MANAGER_VERSION, true );
+		if ( apply_filters( 'job_manager_chosen_enabled', true ) ) {
+			wp_register_script( 'chosen', JOB_MANAGER_PLUGIN_URL . '/assets/js/jquery-chosen/chosen.jquery.min.js', array( 'jquery' ), '1.1.0', true );
+			wp_register_script( 'wp-job-manager-term-multiselect', JOB_MANAGER_PLUGIN_URL . '/assets/js/term-multiselect.min.js', array( 'jquery', 'chosen' ), JOB_MANAGER_VERSION, true );
+			wp_enqueue_style( 'chosen', JOB_MANAGER_PLUGIN_URL . '/assets/css/chosen.css' );
+			$ajax_filter_deps[] = 'chosen';
+		}
+
+		wp_register_script( 'wp-job-manager-ajax-filters', JOB_MANAGER_PLUGIN_URL . '/assets/js/ajax-filters.min.js', $ajax_filter_deps, JOB_MANAGER_VERSION, true );
 		wp_register_script( 'wp-job-manager-job-dashboard', JOB_MANAGER_PLUGIN_URL . '/assets/js/job-dashboard.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
 		wp_register_script( 'wp-job-manager-job-application', JOB_MANAGER_PLUGIN_URL . '/assets/js/job-application.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
 		wp_register_script( 'wp-job-manager-job-submission', JOB_MANAGER_PLUGIN_URL . '/assets/js/job-submission.min.js', array( 'jquery' ), JOB_MANAGER_VERSION, true );
-		wp_register_script( 'chosen', JOB_MANAGER_PLUGIN_URL . '/assets/js/jquery-chosen/chosen.jquery.min.js', array( 'jquery' ), '1.1.0', true );
-		wp_register_script( 'wp-job-manager-term-multiselect', JOB_MANAGER_PLUGIN_URL . '/assets/js/term-multiselect.min.js', array( 'jquery', 'chosen' ), JOB_MANAGER_VERSION, true );
-
 		wp_localize_script( 'wp-job-manager-ajax-filters', 'job_manager_ajax_filters', array(
-			'ajax_url' => $ajax_url
+			'ajax_url' => $ajax_url,
+			'is_rtl'   => is_rtl() ? 1 : 0
 		) );
 		wp_localize_script( 'wp-job-manager-job-dashboard', 'job_manager_job_dashboard', array(
 			'i18n_confirm_delete' => __( 'Are you sure you want to delete this listing?', 'wp-job-manager' )
 		) );
 
-		wp_enqueue_style( 'chosen', JOB_MANAGER_PLUGIN_URL . '/assets/css/chosen.css' );
 		wp_enqueue_style( 'wp-job-manager-frontend', JOB_MANAGER_PLUGIN_URL . '/assets/css/frontend.css' );
 	}
 }
