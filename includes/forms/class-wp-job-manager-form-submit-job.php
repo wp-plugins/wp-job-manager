@@ -535,6 +535,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			'action'             => self::get_action(),
 			'job_fields'         => self::get_fields( 'job' ),
 			'company_fields'     => self::get_fields( 'company' ),
+			'step'               => self::get_step(),
 			'submit_button_text' => apply_filters( 'submit_job_form_submit_button_text', __( 'Preview &rarr;', 'wp-job-manager' ) )
 		) );
 	}
@@ -595,38 +596,44 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * @param  string $post_title
 	 * @param  string $post_content
 	 * @param  string $status
+	 * @param  array $values
+	 * @param  bool $update_slug
 	 */
-	protected static function save_job( $post_title, $post_content, $status = 'preview', $values = array() ) {
-		$job_slug   = array();
-
-		// Prepend with company name
-		if ( ! empty( $values['company']['company_name'] ) ) {
-			$job_slug[] = $values['company']['company_name'];
-		}
-
-		// Prepend location
-		if ( ! empty( $values['job']['job_location'] ) ) {
-			$job_slug[] = $values['job']['job_location'];
-		}
-
-		// Prepend with job type
-		if ( ! empty( $values['job']['job_type'] ) ) {
-			$job_slug[] = $values['job']['job_type'];
-		}
-
-		$job_slug[] = $post_title;
-
-		$job_data  = apply_filters( 'submit_job_form_save_job_data', array(
+	protected static function save_job( $post_title, $post_content, $status = 'preview', $values = array(), $update_slug = true ) {
+		$job_data = array(
 			'post_title'     => $post_title,
-			'post_name'      => sanitize_title( implode( '-', $job_slug ) ),
 			'post_content'   => $post_content,
 			'post_type'      => 'job_listing',
 			'comment_status' => 'closed'
-		), $post_title, $post_content, $status, $values );
+		);
+
+		if ( $update_slug ) {
+			$job_slug   = array();
+
+			// Prepend with company name
+			if ( ! empty( $values['company']['company_name'] ) ) {
+				$job_slug[] = $values['company']['company_name'];
+			}
+
+			// Prepend location
+			if ( ! empty( $values['job']['job_location'] ) ) {
+				$job_slug[] = $values['job']['job_location'];
+			}
+
+			// Prepend with job type
+			if ( ! empty( $values['job']['job_type'] ) ) {
+				$job_slug[] = $values['job']['job_type'];
+			}
+
+			$job_slug[]            = $post_title;
+			$job_data['post_name'] = sanitize_title( implode( '-', $job_slug ) );
+		}
 
 		if ( $status ) {
 			$job_data['post_status'] = $status;
 		}
+
+		$job_data = apply_filters( 'submit_job_form_save_job_data', $job_data, $post_title, $post_content, $status, $values );
 
 		if ( self::$job_id ) {
 			$job_data['ID'] = self::$job_id;
@@ -736,11 +743,12 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	 * Preview Step
 	 */
 	public static function preview() {
-		global $post;
+		global $post, $job_preview;
 
 		if ( self::$job_id ) {
 
-			$post = get_post( self::$job_id );
+			$job_preview       = true;
+			$post              = get_post( self::$job_id );
 			setup_postdata( $post );
 			$post->post_status = 'preview';
 			?>

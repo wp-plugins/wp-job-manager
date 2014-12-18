@@ -73,6 +73,7 @@ class WP_Job_Manager_Form_Edit_Job extends WP_Job_Manager_Form_Submit_Job {
 			'action'             => self::get_action(),
 			'job_fields'         => self::get_fields( 'job' ),
 			'company_fields'     => self::get_fields( 'company' ),
+			'step'               => self::get_step(),
 			'submit_button_text' => __( 'Save changes', 'wp-job-manager' )
 			) );
 	}
@@ -96,7 +97,7 @@ class WP_Job_Manager_Form_Edit_Job extends WP_Job_Manager_Form_Submit_Job {
 			}
 
 			// Update the job
-			self::save_job( $values['job']['job_title'], $values['job']['job_description'], '', $values );
+			self::save_job( $values['job']['job_title'], $values['job']['job_description'], '', $values, false );
 			self::update_job_data( $values );
 
 			// Successful

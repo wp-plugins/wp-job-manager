@@ -3,8 +3,8 @@ Contributors: mikejolley
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jolley@me.com&currency_code=&amount=&return=&item_name=Buy+me+a+coffee+for+A+New+Job+Board+Plugin+for+WordPress
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
-Tested up to: 4.0
-Stable tag: 1.18.0
+Tested up to: 4.1
+Stable tag: 1.19.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -118,6 +118,21 @@ You can view (and contribute) translations via the [Transifex project here](http
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.19.0 =
+* Feature - Added html5 required attribute to required fields.
+* Feature - Added compatibility with RP4WP.
+* Fix - Chosen RTL.
+* Fix - Addded additonal check to check edit capabilities.
+* Fix - Add correct step input to submission form.
+* Tweak - Add CSS class to 'showing' bar when shoing all results (no filters).
+* Tweak - Geocode, use sublocality_level_1 as city.
+* Tweak - Don't update slug when editing via the frontend.
+* Tweak - Set default meta data for new jobs.
+* Tweak - Add geolocation data after import with WP ALL Import.
+* Tweak - Filter to disable chosen: job_manager_chosen_enabled
+* Tweak - Login link on job dashboard. job-dashboard-login.php template file.
+* Tweak - Made backend management honour capabilities of users. Props to minderdl.
 
 = 1.18.0 =
 * Fix - Keep post name when pending job is posted by non-admin.
