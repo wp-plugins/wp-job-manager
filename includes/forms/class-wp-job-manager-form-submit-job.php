@@ -467,13 +467,13 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 	/**
 	 * output function. Call the view handler.
 	 */
-	public static function output() {
+	public static function output( $atts = array() ) {
 		$keys = array_keys( self::$steps );
 
 		self::show_errors();
 
 		if ( isset( $keys[ self::$step ] ) && is_callable( self::$steps[ $keys[ self::$step ] ]['view'] ) ) {
-			call_user_func( self::$steps[ $keys[ self::$step ] ]['view'] );
+			call_user_func( self::$steps[ $keys[ self::$step ] ]['view'], $atts );
 		}
 	}
 
@@ -511,7 +511,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			self::$fields = apply_filters( 'submit_job_form_fields_get_job_data', self::$fields, $job );
 
 		// Get user meta
-		} elseif ( is_user_logged_in() && empty( $_POST ) ) {
+		} elseif ( is_user_logged_in() && empty( $_POST['submit_job'] ) ) {
 			if ( ! empty( self::$fields['company'] ) ) {
 				foreach ( self::$fields['company'] as $key => $field ) {
 					self::$fields['company'][ $key ]['value'] = get_user_meta( get_current_user_id(), '_' . $key, true );
@@ -564,8 +564,22 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			if ( ! is_user_logged_in() ) {
 				$create_account = false;
 
-				if ( job_manager_enable_registration() && ! empty( $_POST['create_account_email'] ) ) {
-					$create_account = wp_job_manager_create_account( $_POST['create_account_email'], get_option( 'job_manager_registration_role' ) );
+				if ( job_manager_enable_registration() ) {
+					if ( job_manager_user_requires_account() ) {
+						if ( ! job_manager_generate_username_from_email() && empty( $_POST['create_account_username'] ) ) {
+							throw new Exception( __( 'Please enter a username.', 'wp-job-manager' ) );
+						}
+						if ( empty( $_POST['create_account_email'] ) ) {
+							throw new Exception( __( 'Please enter your email address.', 'wp-job-manager' ) );
+						}
+					}
+					if ( ! empty( $_POST['create_account_email'] ) ) {
+						$create_account = wp_job_manager_create_account( array(
+							'username' => empty( $_POST['create_account_username'] ) ? '' : $_POST['create_account_username'],
+							'email'    => $_POST['create_account_email'],
+							'role'     => get_option( 'job_manager_registration_role' )
+						) );
+					}
 				}
 
 				if ( is_wp_error( $create_account ) ) {
@@ -729,10 +743,10 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		// And user meta to save time in future
 		if ( is_user_logged_in() ) {
 			update_user_meta( get_current_user_id(), '_company_name', isset( $values['company']['company_name'] ) ? $values['company']['company_name'] : '' );
-			update_user_meta( get_current_user_id(), '_company_website', isset( $values['company']['company_name'] ) ? $values['company']['company_website'] : '' );
-			update_user_meta( get_current_user_id(), '_company_tagline', isset( $values['company']['company_name'] ) ? $values['company']['company_tagline'] : '' );
-			update_user_meta( get_current_user_id(), '_company_twitter', isset( $values['company']['company_name'] ) ? $values['company']['company_twitter'] : '' );
-			update_user_meta( get_current_user_id(), '_company_logo', isset( $values['company']['company_name'] ) ? $values['company']['company_logo'] : '' );
+			update_user_meta( get_current_user_id(), '_company_website', isset( $values['company']['company_website'] ) ? $values['company']['company_website'] : '' );
+			update_user_meta( get_current_user_id(), '_company_tagline', isset( $values['company']['company_tagline'] ) ? $values['company']['company_tagline'] : '' );
+			update_user_meta( get_current_user_id(), '_company_twitter', isset( $values['company']['company_twitter'] ) ? $values['company']['company_twitter'] : '' );
+			update_user_meta( get_current_user_id(), '_company_logo', isset( $values['company']['company_logo'] ) ? $values['company']['company_logo'] : '' );
 			update_user_meta( get_current_user_id(), '_company_video', isset( $values['company']['company_video'] ) ? $values['company']['company_video'] : '' );
 		}
 

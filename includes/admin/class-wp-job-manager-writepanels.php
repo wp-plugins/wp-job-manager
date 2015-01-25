@@ -303,10 +303,11 @@ class WP_Job_Manager_Writepanels {
 		foreach ( $this->job_listing_fields() as $key => $field ) {
 			$type = ! empty( $field['type'] ) ? $field['type'] : 'text';
 
-			if ( method_exists( $this, 'input_' . $type ) )
-				call_user_func( array( $this, 'input_' . $type ), $key, $field );
-			else
+			if ( has_action( 'job_manager_input_' . $type ) ) {
 				do_action( 'job_manager_input_' . $type, $key, $field );
+			} elseif ( method_exists( $this, 'input_' . $type ) ) {
+				call_user_func( array( $this, 'input_' . $type ), $key, $field );
+			}
 		}
 
 		do_action( 'job_manager_job_listing_data_end', $thepostid );
@@ -363,7 +364,7 @@ class WP_Job_Manager_Writepanels {
 			// Locations
 			elseif ( '_job_location' === $key ) {
 				if ( update_post_meta( $post_id, $key, sanitize_text_field( $_POST[ $key ] ) ) ) {
-					// Location data will be updated by maybe_generate_geolocation_data method
+					// Location data will be updated by hooked in methods
 				} elseif ( apply_filters( 'job_manager_geolocation_enabled', true ) && ! WP_Job_Manager_Geocode::has_location_data( $post_id ) ) {
 					WP_Job_Manager_Geocode::generate_location_data( $post_id, sanitize_text_field( $_POST[ $key ] ) );
 				}
