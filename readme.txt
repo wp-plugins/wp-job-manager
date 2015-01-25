@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 3.8
 Tested up to: 4.1
-Stable tag: 1.19.0
+Stable tag: 1.20.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -118,6 +118,25 @@ You can view (and contribute) translations via the [Transifex project here](http
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.20.0 =
+* Feature - Sortable location column in admin.
+* Feature - Automatically Generate Username from Email Address option (disable to show a username field).
+* Feature - 'filled' option for job shortcode to show all filled/non filled jobs.
+* Fix - Pagination with default permalinks.
+* Fix - Correctly generate geolocation data when adding a post manually.
+* Fix - Chosen width when resizing the page.
+* Fix - Show no jobs when all types de-selected.
+* Tweak - content-widget-no-jobs-found.php template file.
+* Tweak - Don't limit keyword search query functions to published jobs.
+* Tweak - job_manager_output_jobs_no_results action.
+* Tweak - No results template hooked into job_manager_output_jobs_no_results.
+* Tweak - Changed content-no-jobs-found.php content to work for ajax and static lists of jobs. Tweaked text.
+* Tweak - job_manager_default_company_logo filter for changing default company image.
+* Tweak - Enhance multiselect field with chosen.
+* Dev - Abiltiy to pass shortcode args to submit_job_form shortcode.
+* Dev - Made get_job_manager_template_part() use locate_job_manager_template().
+* Dev - Changed how username/email/role are passed to wp_job_manager_create_account (backwards compat).
 
 = 1.19.0 =
 * Feature - Added html5 required attribute to required fields.

@@ -50,6 +50,10 @@ class WP_Job_Manager_Ajax {
 			$args['featured'] = $_POST['featured'] === 'true' ? true : false;
 		}
 
+		if ( isset( $_POST['filled'] ) && ( $_POST['filled'] === 'true' || $_POST['filled'] === 'false' ) ) {
+			$args['filled'] = $_POST['filled'] === 'true' ? true : false;
+		}
+
 		ob_start();
 
 		$jobs = get_job_listings( apply_filters( 'job_manager_get_listings_args', $args ) );
@@ -87,7 +91,7 @@ class WP_Job_Manager_Ajax {
 
 		if ( sizeof( $showing_types ) == 1 ) {
 			$result['showing'][] = implode( ', ', $showing_types );
-		} elseif ( $unmatched ) {
+		} elseif ( $unmatched && $showing_types ) {
 			$last_type           = array_pop( $showing_types );
 			$result['showing'][] = implode( ', ', $showing_types ) . " &amp; $last_type";
 		}
