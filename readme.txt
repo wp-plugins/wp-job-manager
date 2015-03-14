@@ -2,9 +2,9 @@
 Contributors: mikejolley
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jolley@me.com&currency_code=&amount=&return=&item_name=Buy+me+a+coffee+for+A+New+Job+Board+Plugin+for+WordPress
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
-Requires at least: 3.8
+Requires at least: 4.1
 Tested up to: 4.1
-Stable tag: 1.20.1
+Stable tag: 1.21.0
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -118,6 +118,31 @@ You can view (and contribute) translations via the [Transifex project here](http
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.21.0 =
+* Feature - Ajax loading history - back button will take you back to current position in the search. If you are on > page 1, a 'load previous' button will be shown so you can paginate either way.
+* Feature - Ajax file upload during job submission.
+* Feature - Cookie set when submitting a job to allow resuming if you leave the page.
+* Feature - job_apply shortcode to show application area in other places on your site.
+* Feature - Allow admin fields to be priority sorted.
+* Feature - Featured job widget.
+* Feature - Scroll to top on pagination click.
+* Feature - Option to "Hide content within expired listings". If disabled, expired listings will be listed normally with applications disabled.
+* Fix - Prevent attachments being uploaded several times.
+* Fix - Expiry date on first save.
+* Fix - Relist should go back to form.
+* Fix - jquery.com CDN for CSS.
+* Tweak - Geocode street and street number separately.
+* Tweak - File upload field markup.
+* Tweak - Added filters around taxonomy definition.
+* Tweak - Chanced search logic/query to use the new meta queries in 4.1.
+* Tweak - Implement transient caching for searches.
+* Tweak - Removed wp_dropdown_user due to performance concerns.
+* Tweak - Use menu_order to make featured listings sticky. Improves performance.
+* Tweak - Retrieve AJAX jobs with GET rather than POST request to take advantage of more caching. Plugins looking for POST data will need to update to look for GET/REQUEST instead.
+* Tweak - Prevent themes that (sigh) mess with content hooks from breaking inputs.
+* Tweak - Remove unused job-category field.
+* Tweak - Hide company div if company name missing.
 
 = 1.20.1 =
 * Fix - Core template overrides.

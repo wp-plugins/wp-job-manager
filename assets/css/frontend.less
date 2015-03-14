@@ -162,22 +162,24 @@
 		.job-manager-uploaded-files {
 			display: table;
 			.job-manager-uploaded-file {
-				line-height: 1.5em;
+				line-height: 2em;
 				font-style: italic;
-				display: table-row;
+				margin-bottom: 1em;
+				display: block;
 				.job-manager-uploaded-file-preview {
-					display: table-cell;
-					vertical-align: middle;
-					padding: .5em 0 .5em 0;
 					img {
 						height: 64px;
 						margin: 0;
+						vertical-align: top;
+					}
+					a {
+						line-height: 64px;
+						display: inline-block;
+						padding: 0 0 0 1em;
 					}
 				}
 				.job-manager-uploaded-file-name {
-					display: table-cell;
-					vertical-align: middle;
-					padding: .5em 0 .5em 1em;
+					display: block;
 				}
 			}
 		}
@@ -465,7 +467,7 @@ ul.job_listings {
 		.internship {
 			background-color: @internship;
 		}
-		.position-filled {
+		.position-filled, .listing-expired {
 			color: #b81c23;
 		}
 		.location:before {
@@ -476,11 +478,23 @@ ul.job_listings {
 			.display-icon;
 			content: '\e80f';
 		}
-		.position-filled:before {
+		.position-filled:before, .listing-expired:before {
 			.display-icon;
 			content: '\e80e';
 		}
 	}
+}
+.job-manager-application-wrapper {
+	clear: both;
+	border: 1px solid #eee;
+	padding: .75em 1em 0;
+	margin: 1em 0;
+	line-height: 1.5em;
+	display: block;
+	position: relative;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+.single_job_listing, .job-manager-application-wrapper {
 	.application {
 		padding: 0;
 		margin: 0 0 1em;
@@ -629,6 +643,12 @@ div.job_listings {
 		padding: 1em 0 1em 0;
 		border-bottom: 1px solid #eee;
 		line-height: 1;
+	}
+	.load_previous {
+		border-top: 1px solid #eee;
+	}
+	.load_more_jobs + ul.job_listings {
+		border-top: 0;
 	}
 	.load_more_jobs {
 		text-align: center;

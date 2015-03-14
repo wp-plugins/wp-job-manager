@@ -1,28 +1,27 @@
-<?php if ( ! empty( $field['value'] ) ) : ?>
-	<div class="job-manager-uploaded-files">
-	<?php if ( is_array( $field['value'] ) ) : ?>
-		<?php foreach ( $field['value'] as $value ) : ?>
-			<div class="job-manager-uploaded-file">
-				<?php if ( in_array( substr( strrchr( $value, '.' ), 1 ), array( 'jpg', 'gif', 'png', 'jpeg', 'jpe' ) ) ) : ?>
-					<span class="job-manager-uploaded-file-preview"><img src="<?php echo $value; ?>" /></span>
-				<?php endif; ?>
-				<?php echo '<span class="job-manager-uploaded-file-name"><code>' . basename( $value ) . ' <a class="job-manager-remove-uploaded-file" href="#">[' . __( 'remove', 'wp-job-manager' ) . ']</a></code></span>'; ?>
-				<input type="hidden" class="input-text" name="current_<?php echo esc_attr( isset( $field['name'] ) ? $field['name'] : $key ); ?>[]" value="<?php echo esc_attr( $value ); ?>" />
-			</div>
-		<?php endforeach; ?>
-	<?php elseif ( $value = $field['value'] ) : ?>
-		<div class="job-manager-uploaded-file">
-			<?php if ( in_array( substr( strrchr( $value, '.' ), 1 ), array( 'jpg', 'gif', 'png', 'jpeg', 'jpe' ) ) ) : ?>
-				<span class="job-manager-uploaded-file-preview"><img src="<?php echo $value; ?>" /></span>
-			<?php endif; ?>
-			<?php echo '<span class="job-manager-uploaded-file-name"><code>' . basename( $value ) . ' <a class="job-manager-remove-uploaded-file" href="#">[' . __( 'remove', 'wp-job-manager' ) . ']</a></code> ' . __( 'or', 'wp-job-manager' ) . '&hellip;</span>'; ?>
-			<input type="hidden" class="input-text" name="current_<?php echo esc_attr( isset( $field['name'] ) ? $field['name'] : $key ); ?>" value="<?php echo esc_attr( $field['value'] ); ?>" />
-		</div>
-	<?php endif; ?>
-	</div>
-<?php endif; ?>
+<?php
+$classes            = array( 'input-text' );
+$allowed_mime_types = array_keys( ! empty( $field['allowed_mime_types'] ) ? $field['allowed_mime_types'] : get_allowed_mime_types() );
+$field_name         = isset( $field['name'] ) ? $field['name'] : $key;
+$field_name         .= ! empty( $field['multiple'] ) ? '[]' : '';
 
-<input type="file" class="input-text" <?php if ( ! empty( $field['multiple'] ) ) echo 'multiple'; ?> name="<?php echo esc_attr( isset( $field['name'] ) ? $field['name'] : $key ); ?><?php if ( ! empty( $field['multiple'] ) ) echo '[]'; ?>" id="<?php echo esc_attr( $key ); ?>" placeholder="<?php echo empty( $field['placeholder'] ) ? '' : esc_attr( $field['placeholder'] ); ?>" />
+if ( ! empty( $field['ajax'] ) ) {
+	wp_enqueue_script( 'wp-job-manager-ajax-file-upload' );
+	$classes[] = 'wp-job-manager-file-upload';
+}
+?>
+<div class="job-manager-uploaded-files">
+	<?php if ( ! empty( $field['value'] ) ) : ?>
+		<?php if ( is_array( $field['value'] ) ) : ?>
+			<?php foreach ( $field['value'] as $value ) : ?>
+				<?php get_job_manager_template( 'form-fields/uploaded-file-html.php', array( 'key' => $key, 'name' => 'current_' . $field_name, 'value' => $value, 'field' => $field ) ); ?>
+			<?php endforeach; ?>
+		<?php elseif ( $value = $field['value'] ) : ?>
+			<?php get_job_manager_template( 'form-fields/uploaded-file-html.php', array( 'key' => $key, 'name' => 'current_' . $field_name, 'value' => $value, 'field' => $field ) ); ?>
+		<?php endif; ?>
+	<?php endif; ?>
+</div>
+
+<input type="file" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-file_types="<?php echo esc_attr( implode( '|', $allowed_mime_types ) ); ?>" <?php if ( ! empty( $field['multiple'] ) ) echo 'multiple'; ?> name="<?php echo esc_attr( isset( $field['name'] ) ? $field['name'] : $key ); ?><?php if ( ! empty( $field['multiple'] ) ) echo '[]'; ?>" id="<?php echo esc_attr( $key ); ?>" placeholder="<?php echo empty( $field['placeholder'] ) ? '' : esc_attr( $field['placeholder'] ); ?>" <?php if ( ! empty( $field['required'] ) && empty( $field['value'] ) ) echo 'required'; ?> />
 <small class="description">
 	<?php if ( ! empty( $field['description'] ) ) : ?>
 		<?php echo $field['description']; ?>
