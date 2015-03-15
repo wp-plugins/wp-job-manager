@@ -1,1 +1,0 @@
-<p><?php printf( __( 'To apply for this job please visit the following URL: <a href="%1$s" target="_blank">%1$s &rarr;</a>', 'wp-job-manager' ), $apply->url ); ?></p>
