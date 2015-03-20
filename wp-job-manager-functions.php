@@ -143,9 +143,17 @@ if ( ! function_exists( 'get_job_listings_keyword_search' ) ) :
 		global $wpdb, $job_manager_keyword;
 
 		// Query matching ids to avoid more joins
-		$post_ids = $wpdb->get_col( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_value LIKE '%" . esc_sql( $job_manager_keyword ) . "%'" );
+		$post_ids   = $wpdb->get_col( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_value LIKE '" . esc_sql( $job_manager_keyword ) . "%'" );
+		$conditions = array();
 
-		$args['where'] .= " AND ( {$wpdb->posts}.post_title LIKE '%" . esc_sql( $job_manager_keyword ) . "%' OR {$wpdb->posts}.post_content LIKE '%" . esc_sql( $job_manager_keyword ) . "%' OR {$wpdb->posts}.ID IN (" . esc_sql( implode( ',', $post_ids ) ) . ") ) ";
+		$conditions[] = "{$wpdb->posts}.post_title LIKE '%" . esc_sql( $job_manager_keyword ) . "%'";
+		$conditions[] = "{$wpdb->posts}.post_content RLIKE '[[:<:]]" . esc_sql( $job_manager_keyword ) . "[[:>:]]'";
+
+		if ( $post_ids ) {
+			$conditions[] = "{$wpdb->posts}.ID IN (" . esc_sql( implode( ',', $post_ids ) ) . ")";
+		}
+
+		$args['where'] .= " AND ( " . implode( ' OR ', $conditions ) . " ) ";
 
 		return $args;
 	}
@@ -505,7 +513,7 @@ function job_manager_dropdown_categories( $args = '' ) {
 	extract( $r );
 
 	// Store in a transient to help sites with many cats
-	$categories_hash = 'jmc-' . md5( json_encode( $r ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'get_job_listings' ) );
+	$categories_hash = 'jmc-' . md5( json_encode( $r ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'jm_get_' . $r['taxonomy'] ) );
 
 	if ( false === ( $categories = get_transient( $categories_hash ) ) ) {
 		$categories = get_terms( $taxonomy, $r );
