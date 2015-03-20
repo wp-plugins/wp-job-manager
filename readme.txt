@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mike.jol
 Tags: job listing, job board, job, jobs, company, hiring, employment, employees, candidate, freelance, internship
 Requires at least: 4.1
 Tested up to: 4.1
-Stable tag: 1.21.3
+Stable tag: 1.21.4
 
 Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
 
@@ -118,6 +118,16 @@ You can view (and contribute) translations via the [Transifex project here](http
 6. Job listings in admin.
 
 == Changelog ==
+
+= 1.21.4 =
+* Fix - get_job_listings_keyword_search keyword search.
+* Fix - Clear term cache when terms are set for any object.
+* Fix - Legacy uploads.
+* Tweak - RTL improvements.
+* Tweak - Use RLIKE to search keywords in content.
+* Tweak - Show relative pagination.
+* Updated translations.
+* Arabic translation by Mamdouh Samy.
 
 = 1.21.3 =
 * Feature - Support posts_per_page in feed.
