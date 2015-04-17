@@ -10,10 +10,7 @@ class WP_Job_Manager_Shortcodes {
 	private $job_dashboard_message = '';
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Constructor
 	 */
 	public function __construct() {
 		add_action( 'wp', array( $this, 'shortcode_action_handler' ) );
@@ -120,8 +117,9 @@ class WP_Job_Manager_Shortcodes {
 	 */
 	public function job_dashboard( $atts ) {
 		if ( ! is_user_logged_in() ) {
+			ob_start();
 			get_job_manager_template( 'job-dashboard-login.php' );
-			return;
+			return ob_get_clean();
 		}
 
 		extract( shortcode_atts( array(
