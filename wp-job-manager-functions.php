@@ -44,7 +44,7 @@ function get_job_listings( $args = array() ) {
 	}
 
 	if ( ! empty( $args['search_location'] ) ) {
-		$location_meta_keys = array( 'geolocation_formatted_address', '_job_location' );
+		$location_meta_keys = array( 'geolocation_formatted_address', '_job_location', 'geolocation_state_long' );
 		$location_search    = array( 'relation' => 'OR' );
 		foreach ( $location_meta_keys as $meta_key ) {
 			$location_search[] = array(
@@ -113,7 +113,13 @@ function get_job_listings( $args = array() ) {
 	$query_args = apply_filters( 'get_job_listings_query_args', $query_args, $args );
 
 	// Generate hash
-	$query_args_hash = 'jm-' . md5( json_encode( $query_args ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'get_job_listings' ) );
+	$to_hash = json_encode( $query_args ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'get_job_listings' );
+
+	if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+		$to_hash .= ICL_LANGUAGE_CODE;
+	}
+
+	$query_args_hash = 'jm_query_' . md5( $to_hash );
 
 	do_action( 'before_get_job_listings', $query_args, $args );
 
@@ -513,7 +519,7 @@ function job_manager_dropdown_categories( $args = '' ) {
 	extract( $r );
 
 	// Store in a transient to help sites with many cats
-	$categories_hash = 'jmc-' . md5( json_encode( $r ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'jm_get_' . $r['taxonomy'] ) );
+	$categories_hash = 'jm_cats_' . md5( json_encode( $r ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'jm_get_' . $r['taxonomy'] ) );
 
 	if ( false === ( $categories = get_transient( $categories_hash ) ) ) {
 		$categories = get_terms( $taxonomy, $r );
@@ -655,6 +661,7 @@ function job_manager_upload_file( $file, $args = array() ) {
 			return new WP_Error( 'upload', $upload['error'] );
 		} else {
 			$uploaded_file->url       = $upload['url'];
+			$uploaded_file->file      = $upload['file'];
 			$uploaded_file->name      = basename( $upload['file'] );
 			$uploaded_file->type      = $upload['type'];
 			$uploaded_file->size      = $file['size'];
@@ -666,4 +673,25 @@ function job_manager_upload_file( $file, $args = array() ) {
 	$job_manager_uploading_file = '';
 
 	return $uploaded_file;
+}
+
+/**
+ * Calculate and return the job expiry date
+ * @param  int $job_id
+ * @return string
+ */
+function calculate_job_expiry( $job_id ) {
+	// Get duration from the product if set...
+	$duration = get_post_meta( $job_id, '_job_duration', true );
+
+	// ...otherwise use the global option
+	if ( ! $duration ) {
+		$duration = absint( get_option( 'job_manager_submission_duration' ) );
+	}
+
+	if ( $duration ) {
+		return date( 'Y-m-d', strtotime( "+{$duration} days", current_time( 'timestamp' ) ) );
+	}
+
+	return '';
 }

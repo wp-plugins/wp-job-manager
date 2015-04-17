@@ -13,11 +13,12 @@ class WP_Job_Manager_Post_Types {
 		add_filter( 'the_content', array( $this, 'job_content' ) );
 		add_action( 'job_manager_check_for_expired_jobs', array( $this, 'check_for_expired_jobs' ) );
 		add_action( 'job_manager_delete_old_previews', array( $this, 'delete_old_previews' ) );
-		add_action( 'pending_to_publish', array( $this, 'set_expirey' ) );
-		add_action( 'preview_to_publish', array( $this, 'set_expirey' ) );
-		add_action( 'draft_to_publish', array( $this, 'set_expirey' ) );
-		add_action( 'auto-draft_to_publish', array( $this, 'set_expirey' ) );
-		add_action( 'expired_to_publish', array( $this, 'set_expirey' ) );
+
+		add_action( 'pending_to_publish', array( $this, 'set_expiry' ) );
+		add_action( 'preview_to_publish', array( $this, 'set_expiry' ) );
+		add_action( 'draft_to_publish', array( $this, 'set_expiry' ) );
+		add_action( 'auto-draft_to_publish', array( $this, 'set_expiry' ) );
+		add_action( 'expired_to_publish', array( $this, 'set_expiry' ) );
 
 		add_filter( 'the_job_description', 'wptexturize'        );
 		add_filter( 'the_job_description', 'convert_smilies'    );
@@ -418,15 +419,27 @@ class WP_Job_Manager_Post_Types {
 	}
 
 	/**
-	 * Set expirey date when job status changes
+	 * Typo -.-
 	 */
 	public function set_expirey( $post ) {
+		$this->set_expiry( $post );
+	}
+
+	/**
+	 * Set expirey date when job status changes
+	 */
+	public function set_expiry( $post ) {
 		if ( $post->post_type !== 'job_listing' ) {
 			return;
 		}
 
 		// See if it is already set
 		if ( metadata_exists( 'post', $post->ID, '_job_expires' ) ) {
+			$expires = get_post_meta( $post->ID, '_job_expires', true );
+			if ( $expires && strtotime( $expires ) < current_time( 'timestamp' ) ) {
+				update_post_meta( $post->ID, '_job_expires', '' );
+				$_POST[ '_job_expires' ] = '';
+			}
 			return;
 		}
 
@@ -437,25 +450,12 @@ class WP_Job_Manager_Post_Types {
 
 		// No manual setting? Lets generate a date
 		} else {
-			// Get duration from the product if set...
-			$duration = get_post_meta( $post->ID, '_job_duration', true );
+			$expires = calculate_job_expiry( $post->ID );
+			update_post_meta( $post->ID, '_job_expires', $expires );
 
-			// ...otherwise use the global option
-			if ( ! $duration ) {
-				$duration = absint( get_option( 'job_manager_submission_duration' ) );
-			}
-
-			if ( $duration ) {
-				$expires = date( 'Y-m-d', strtotime( "+{$duration} days", current_time( 'timestamp' ) ) );
-				update_post_meta( $post->ID, '_job_expires', $expires );
-
-				// In case we are saving a post, ensure post data is updated so the field is not overridden
-				if ( isset( $_POST[ '_job_expires' ] ) ) {
-					$_POST[ '_job_expires' ] = $expires;
-				}
-
-			} else {
-				update_post_meta( $post->ID, '_job_expires', '' );
+			// In case we are saving a post, ensure post data is updated so the field is not overridden
+			if ( isset( $_POST[ '_job_expires' ] ) ) {
+				$_POST[ '_job_expires' ] = $expires;
 			}
 		}
 	}
@@ -518,9 +518,9 @@ class WP_Job_Manager_Post_Types {
 		global $wpdb;
 
 		if ( '1' == $_meta_value ) {
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => 0 ), array( 'ID' => $object_id ) );
+			$wpdb->update( $wpdb->posts, array( 'menu_order' => -1 ), array( 'ID' => $object_id ) );
 		} else {
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => 1 ), array( 'ID' => $object_id, 'menu_order' => 0 ) );
+			$wpdb->update( $wpdb->posts, array( 'menu_order' => 0 ), array( 'ID' => $object_id, 'menu_order' => -1 ) );
 		}
 	}
 

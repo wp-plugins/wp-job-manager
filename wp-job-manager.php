@@ -3,11 +3,11 @@
 Plugin Name: WP Job Manager
 Plugin URI: https://wpjobmanager.com/
 Description: Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
-Version: 1.21.4
+Version: 1.22.0
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 4.1
-Tested up to: 4.1
+Tested up to: 4.2
 Text Domain: wp-job-manager
 Domain Path: /languages
 
@@ -31,11 +31,12 @@ class WP_Job_Manager {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'JOB_MANAGER_VERSION', '1.21.4' );
+		define( 'JOB_MANAGER_VERSION', '1.22.0' );
 		define( 'JOB_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
 		// Includes
+		include( 'includes/class-wp-job-manager-install.php' );
 		include( 'includes/class-wp-job-manager-post-types.php' );
 		include( 'includes/class-wp-job-manager-ajax.php' );
 		include( 'includes/class-wp-job-manager-shortcodes.php' );
@@ -54,15 +55,17 @@ class WP_Job_Manager {
 
 		// Activation - works with symlinks
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), array( $this->post_types, 'register_post_types' ), 10 );
-		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), create_function( "", "include_once( 'includes/class-wp-job-manager-install.php' );" ), 10 );
+		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), array( 'WP_Job_Manager_Install', 'install' ), 10 );
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'flush_rewrite_rules', 15 );
 
-		// Actions
-		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
-		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		// Switch theme
 		add_action( 'switch_theme', array( $this->post_types, 'register_post_types' ), 10 );
 		add_action( 'switch_theme', 'flush_rewrite_rules', 15 );
-		add_action( 'widgets_init', create_function( "", "include_once( 'includes/class-wp-job-manager-widgets.php' );" ) );
+
+		// Actions
+		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		add_action( 'widgets_init', array( $this, 'widgets_init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
 		add_action( 'admin_init', array( $this, 'updater' ) );
 	}
@@ -72,7 +75,7 @@ class WP_Job_Manager {
 	 */
 	public function updater() {
 		if ( version_compare( JOB_MANAGER_VERSION, get_option( 'wp_job_manager_version' ), '>' ) ) {
-			include_once( 'includes/class-wp-job-manager-install.php' );
+			WP_Job_Manager_Install::install();
 		}
 	}
 
@@ -80,9 +83,7 @@ class WP_Job_Manager {
 	 * Localisation
 	 */
 	public function load_plugin_textdomain() {
-		$locale = apply_filters( 'plugin_locale', get_locale(), 'wp-job-manager' );
-
-		load_textdomain( 'wp-job-manager', WP_LANG_DIR . "/wp-job-manager/wp-job-manager-$locale.mo" );
+		load_textdomain( 'wp-job-manager', WP_LANG_DIR . "/wp-job-manager/wp-job-manager-" . apply_filters( 'plugin_locale', get_locale(), 'wp-job-manager' ) . ".mo" );
 		load_plugin_textdomain( 'wp-job-manager', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
@@ -92,6 +93,13 @@ class WP_Job_Manager {
 	public function include_template_functions() {
 		include( 'wp-job-manager-functions.php' );
 		include( 'wp-job-manager-template.php' );
+	}
+
+	/**
+	 * Widgets init
+	 */
+	public function widgets_init() {
+		include_once( 'includes/class-wp-job-manager-widgets.php' );
 	}
 
 	/**
