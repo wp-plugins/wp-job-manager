@@ -131,12 +131,12 @@ class WP_Job_Manager_Writepanels {
 	}
 
 	/**
-	 * input_text function.
+	 * input_file function.
 	 *
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_file( $key, $field ) {
+	public static function input_file( $key, $field ) {
 		global $thepostid;
 
 		if ( ! isset( $field['value'] ) ) {
@@ -175,7 +175,7 @@ class WP_Job_Manager_Writepanels {
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_text( $key, $field ) {
+	public static function input_text( $key, $field ) {
 		global $thepostid;
 
 		if ( ! isset( $field['value'] ) ) {
@@ -200,7 +200,7 @@ class WP_Job_Manager_Writepanels {
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_textarea( $key, $field ) {
+	public static function input_textarea( $key, $field ) {
 		global $thepostid;
 
 		if ( ! isset( $field['value'] ) ) {
@@ -225,7 +225,7 @@ class WP_Job_Manager_Writepanels {
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_select( $key, $field ) {
+	public static function input_select( $key, $field ) {
 		global $thepostid;
 
 		if ( ! isset( $field['value'] ) ) {
@@ -254,7 +254,7 @@ class WP_Job_Manager_Writepanels {
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_multiselect( $key, $field ) {
+	public static function input_multiselect( $key, $field ) {
 		global $thepostid;
 
 		if ( ! isset( $field['value'] ) ) {
@@ -283,7 +283,7 @@ class WP_Job_Manager_Writepanels {
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_checkbox( $key, $field ) {
+	public static function input_checkbox( $key, $field ) {
 		global $thepostid;
 
 		if ( empty( $field['value'] ) ) {
@@ -309,7 +309,7 @@ class WP_Job_Manager_Writepanels {
 	 * @param mixed $key
 	 * @param mixed $field
 	 */
-	public function input_author( $key, $field ) {
+	public static function input_author( $key, $field ) {
 		global $thepostid, $post;
 
 		if ( ! isset( $field['value'] ) ) {
@@ -343,13 +343,41 @@ class WP_Job_Manager_Writepanels {
 	}
 
 	/**
+	 * input_radio function.
+	 *
+	 * @param mixed $key
+	 * @param mixed $field
+	 */
+	public static function input_radio( $key, $field ) {
+		global $thepostid;
+
+		if ( empty( $field['value'] ) ) {
+			$field['value'] = get_post_meta( $thepostid, $key, true );
+		}
+		if ( ! empty( $field['name'] ) ) {
+			$name = $field['name'];
+		} else {
+			$name = $key;
+		}
+		?>
+		<p class="form-field form-field-checkbox">
+			<label><?php echo esc_html( $field['label'] ) ; ?></label>
+			<?php foreach ( $field['options'] as $option_key => $value ) : ?>
+				<label><input type="radio" class="radio" name="<?php echo esc_attr( isset( $field['name'] ) ? $field['name'] : $key ); ?>" value="<?php echo esc_attr( $option_key ); ?>" <?php checked( $field['value'], $option_key ); ?> /> <?php echo esc_html( $value ); ?></label>
+			<?php endforeach; ?>
+			<?php if ( ! empty( $field['description'] ) ) : ?><span class="description"><?php echo $field['description']; ?></span><?php endif; ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * job_listing_data function.
 	 *
 	 * @access public
 	 * @param mixed $post
 	 * @return void
 	 */
-	public function job_listing_data( $post ) {
+	public static function job_listing_data( $post ) {
 		global $post, $thepostid;
 
 		$thepostid = $post->ID;

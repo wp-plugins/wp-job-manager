@@ -119,7 +119,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 		$this->fields = apply_filters( 'submit_job_form_fields', array(
 			'job' => array(
 				'job_title' => array(
-					'label'       => __( 'Title', 'wp-job-manager' ),
+					'label'       => __( 'Job Title', 'wp-job-manager' ),
 					'type'        => 'text',
 					'required'    => true,
 					'placeholder' => '',
@@ -256,6 +256,7 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 						$check_value = array_filter( array( $values[ $group_key ][ $key ] ) );
 					}
 					if ( ! empty( $check_value ) ) {
+						$file_url = current( explode( '?', $file_url ) );
 						foreach ( $check_value as $file_url ) {
 							if ( ( $info = wp_check_filetype( $file_url ) ) && ! in_array( $info['type'], $field['allowed_mime_types'] ) ) {
 								throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $info['ext'], implode( ', ', array_keys( $field['allowed_mime_types'] ) ) ) );
@@ -462,17 +463,17 @@ class WP_Job_Manager_Form_Submit_Job extends WP_Job_Manager_Form {
 			$job_slug   = array();
 
 			// Prepend with company name
-			if ( ! empty( $values['company']['company_name'] ) ) {
+			if ( apply_filters( 'submit_job_form_prefix_post_name_with_company', true ) && ! empty( $values['company']['company_name'] ) ) {
 				$job_slug[] = $values['company']['company_name'];
 			}
 
 			// Prepend location
-			if ( ! empty( $values['job']['job_location'] ) ) {
+			if ( apply_filters( 'submit_job_form_prefix_post_name_with_location', true ) && ! empty( $values['job']['job_location'] ) ) {
 				$job_slug[] = $values['job']['job_location'];
 			}
 
 			// Prepend with job type
-			if ( ! empty( $values['job']['job_type'] ) ) {
+			if ( apply_filters( 'submit_job_form_prefix_post_name_with_job_type', true ) && ! empty( $values['job']['job_type'] ) ) {
 				$job_slug[] = $values['job']['job_type'];
 			}
 

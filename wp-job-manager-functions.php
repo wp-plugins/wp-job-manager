@@ -81,17 +81,22 @@ function get_job_listings( $args = array() ) {
 	}
 
 	if ( ! empty( $args['search_categories'] ) ) {
-		$field                     = is_numeric( $args['search_categories'][0] ) ? 'term_id' : 'slug';
+		$field    = is_numeric( $args['search_categories'][0] ) ? 'term_id' : 'slug';
+		$operator = 'all' === get_option( 'job_manager_category_filter_type', 'all' ) && sizeof( $args['search_categories'] ) > 1 ? 'AND' : 'IN';
 		$query_args['tax_query'][] = array(
-			'taxonomy' => 'job_listing_category',
-			'field'    => $field,
-			'terms'    => $args['search_categories'],
-			'operator' => 'all' === get_option( 'job_manager_category_filter_type', 'all' ) ? 'AND' : 'IN'
+			'taxonomy'         => 'job_listing_category',
+			'field'            => $field,
+			'terms'            => array_values( $args['search_categories'] ),
+			'include_children' => $operator !== 'AND' ,
+			'operator'         => $operator
 		);
 	}
 
 	if ( 'featured' === $args['orderby'] ) {
-		add_filter( 'posts_clauses', 'order_featured_job_listing' );
+		$query_args['orderby'] = array(
+			'menu_order' => 'ASC',
+			'title'      => 'DESC'
+		);
 	}
 
 	if ( $job_manager_keyword = sanitize_text_field( $args['search_keywords'] ) ) {
@@ -113,25 +118,18 @@ function get_job_listings( $args = array() ) {
 	$query_args = apply_filters( 'get_job_listings_query_args', $query_args, $args );
 
 	// Generate hash
-	$to_hash = json_encode( $query_args ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'get_job_listings' );
-
-	if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
-		$to_hash .= ICL_LANGUAGE_CODE;
-	}
-
-	$query_args_hash = 'jm_query_' . md5( $to_hash );
+	$to_hash         = defined( 'ICL_LANGUAGE_CODE' ) ? json_encode( $query_args ) . ICL_LANGUAGE_CODE : json_encode( $query_args );
+	$query_args_hash = 'jm_' . md5( $to_hash ) . WP_Job_Manager_Cache_Helper::get_transient_version( 'get_job_listings' );
 
 	do_action( 'before_get_job_listings', $query_args, $args );
 
 	if ( false === ( $result = get_transient( $query_args_hash ) ) ) {
 		$result = new WP_Query( $query_args );
-
 		set_transient( $query_args_hash, $result, DAY_IN_SECONDS * 30 );
 	}
 
 	do_action( 'after_get_job_listings', $query_args, $args );
 
-	remove_filter( 'posts_clauses', 'order_featured_job_listing' );
 	remove_filter( 'posts_clauses', 'get_job_listings_keyword_search' );
 
 	return $result;
@@ -167,16 +165,15 @@ endif;
 
 if ( ! function_exists( 'order_featured_job_listing' ) ) :
 	/**
-	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065
+	 * Was used for sorting.
 	 *
+	 * @deprecated 1.22.4
 	 * @param array $args
 	 * @return array
 	 */
 	function order_featured_job_listing( $args ) {
 		global $wpdb;
-
 		$args['orderby'] = "$wpdb->posts.menu_order ASC, $wpdb->posts.post_date DESC";
-
 		return $args;
 	}
 endif;
@@ -286,10 +283,10 @@ function job_manager_get_filtered_links( $args = array() ) {
 		'rss_link' => array(
 			'name' => __( 'RSS', 'wp-job-manager' ),
 			'url'  => get_job_listing_rss_link( apply_filters( 'job_manager_get_listings_custom_filter_rss_args', array(
-				'type'           => isset( $args['filter_job_types'] ) ? implode( ',', $args['filter_job_types'] ) : '',
-				'location'       => $args['search_location'],
-				'job_categories' => implode( ',', $job_categories ),
-				's'              => $args['search_keywords'],
+				'job_types'       => isset( $args['filter_job_types'] ) ? implode( ',', $args['filter_job_types'] ) : '',
+				'search_location' => $args['search_location'],
+				'job_categories'  => implode( ',', $job_categories ),
+				'search_keywords' => $args['search_keywords'],
 			) ) )
 		)
 	), $args );
@@ -315,8 +312,7 @@ if ( ! function_exists( 'get_job_listing_rss_link' ) ) :
  * @return string
  */
 function get_job_listing_rss_link( $args = array() ) {
-	$rss_link = add_query_arg( array_merge( array( 'feed' => 'job_feed' ), $args ), home_url() );
-
+	$rss_link = add_query_arg( urlencode_deep( array_merge( array( 'feed' => 'job_feed' ), $args ) ), home_url() );
 	return $rss_link;
 }
 endif;
