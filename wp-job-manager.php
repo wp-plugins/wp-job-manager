@@ -3,7 +3,7 @@
 Plugin Name: WP Job Manager
 Plugin URI: https://wpjobmanager.com/
 Description: Manage job listings from the WordPress admin panel, and allow users to post jobs directly to your site.
-Version: 1.22.3
+Version: 1.23.0
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 4.1
@@ -31,7 +31,7 @@ class WP_Job_Manager {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'JOB_MANAGER_VERSION', '1.22.3' );
+		define( 'JOB_MANAGER_VERSION', '1.23.0' );
 		define( 'JOB_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
@@ -54,6 +54,7 @@ class WP_Job_Manager {
 		$this->post_types = new WP_Job_Manager_Post_Types();
 
 		// Activation - works with symlinks
+		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), array( 'WP_Job_Manager_Ajax', 'add_endpoint' ), 10 );
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), array( $this->post_types, 'register_post_types' ), 10 );
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), array( 'WP_Job_Manager_Install', 'install' ), 10 );
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'flush_rewrite_rules', 15 );
@@ -106,7 +107,7 @@ class WP_Job_Manager {
 	 * Register and enqueue scripts and css
 	 */
 	public function frontend_scripts() {
-		$ajax_url         = admin_url( 'admin-ajax.php', 'relative' );
+		$ajax_url         = WP_Job_Manager_Ajax::get_endpoint();
 		$ajax_filter_deps = array( 'jquery', 'jquery-deserialize' );
 
 		// WPML workaround until this is standardized
