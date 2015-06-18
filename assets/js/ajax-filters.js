@@ -63,7 +63,7 @@ jQuery( document ).ready( function ( $ ) {
 			}
 
 			data = {
-				action: 'job_manager_get_listings',
+				lang: job_manager_ajax_filters.lang,
 				search_keywords: keywords,
 				search_location: location,
 				search_categories: categories,
@@ -89,6 +89,7 @@ jQuery( document ).ready( function ( $ ) {
 			}
 
 			data = {
+				lang: job_manager_ajax_filters.lang,
 				search_categories: categories,
 				search_keywords: keywords,
 				search_location: location,
@@ -153,7 +154,21 @@ jQuery( document ).ready( function ( $ ) {
 						target.triggerHandler( 'updated_results', result );
 
 					} catch ( err ) {
-						//console.log( err );
+						if ( window.console ) {
+							console.log( err );
+						}
+					}
+				}
+			},
+			error: function ( jqXHR, textStatus, error ) {
+				if ( window.console && 'abort' !== textStatus ) {
+					console.log( textStatus + ': ' + error );
+				}
+			},
+			statusCode: {
+				404: function() {
+					if ( window.console ) {
+						console.log( "Error 404: Ajax Endpoint cannot be reached. Go to Settings > Permalinks and save to resolve." );
 					}
 				}
 			}
