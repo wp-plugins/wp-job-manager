@@ -99,13 +99,13 @@ jQuery( document ).ready( function ( $ ) {
 				page: page,
 				featured: featured,
 				filled: filled,
-				show_pagination: target.data( 'show_pagination' ),
+				show_pagination: target.data( 'show_pagination' )
 			};
 
 		}
 
 		xhr[index] = $.ajax( {
-			type: 'GET',
+			type: 'POST',
 			url: job_manager_ajax_filters.ajax_url + 'get_listings',
 			data: data,
 			success: function ( result ) {
