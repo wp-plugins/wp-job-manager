@@ -106,7 +106,7 @@ jQuery( document ).ready( function ( $ ) {
 
 		xhr[index] = $.ajax( {
 			type: 'POST',
-			url: job_manager_ajax_filters.ajax_url + 'get_listings',
+			url: job_manager_ajax_filters.ajax_url.toString().replace( "%%endpoint%%", "get_listings" ),
 			data: data,
 			success: function ( result ) {
 				if ( result ) {
@@ -175,7 +175,7 @@ jQuery( document ).ready( function ( $ ) {
 		} );
 	} );
 
-	$( '#search_keywords, #search_location, .job_types :input, #search_categories' ).change( function() {
+	$( '#search_keywords, #search_location, .job_types :input, #search_categories, .job-manager-filter' ).change( function() {
 		var target   = $( this ).closest( 'div.job_listings' );
 		target.triggerHandler( 'update_results', [ 1, false ] );
 		job_manager_store_state( target, 1 );
@@ -191,8 +191,7 @@ jQuery( document ).ready( function ( $ ) {
 		var target = $( this ).closest( 'div.job_listings' );
 		var form = $( this ).closest( 'form' );
 
-		form.find( ':input[name="search_keywords"]' ).not(':input[type="hidden"]').val( '' );
-		form.find( ':input[name="search_location"]' ).not(':input[type="hidden"]').val( '' );
+		form.find( ':input[name="search_keywords"], :input[name="search_location"], .job-manager-filter' ).not(':input[type="hidden"]').val( '' ).trigger( 'chosen:updated' );
 		form.find( ':input[name^="search_categories"]' ).not(':input[type="hidden"]').val( 0 ).trigger( 'chosen:updated' );
 		$( ':input[name="filter_job_type[]"]', form ).not(':input[type="hidden"]').attr( 'checked', 'checked' );
 
